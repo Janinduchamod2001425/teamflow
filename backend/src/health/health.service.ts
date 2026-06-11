@@ -1,12 +1,16 @@
 import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { HealthResponseDto } from './dto/health-response.dto';
 
 @Injectable()
 export class HealthService {
-  getHealth() {
+  constructor(private readonly configService: ConfigService) {}
+
+  getHealth(): HealthResponseDto {
     return {
       status: true,
-      message: 'TeamFlow Backend is running successfully 🚀',
-      version: '1.0.0',
+      message: `${this.configService.get<string>('APP_NAME')} is running successfully!`,
+      version: this.configService.get<string>('APP_VERSION') ?? '1.0.0',
     };
   }
 }
