@@ -2,6 +2,7 @@ import { ConflictException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import * as bcrypt from 'bcrypt';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UsersService {
@@ -56,5 +57,34 @@ export class UsersService {
     }
 
     return user;
+  }
+
+  async update(id: string, updateUserDto: UpdateUserDto) {
+    await this.findOne(id); // Ensure the user exists before updating
+
+    if (updateUserDto.password) {
+      updateUserDto.password = await bcrypt.hash(updateUserDto.password, 10);
+    }
+
+    return this.prisma.user.update({
+      where: { id },
+      data: updateUserDto,
+      omit: {
+        password: true,
+      },
+    });
+  }
+
+  async remove(id: string) {
+    await this.findOne(id);
+
+    await this.prisma.user.delete({
+      where: { id },
+    });
+
+    return {
+      success: true,
+      message: 'User deleted successfully',
+    };
   }
 }
