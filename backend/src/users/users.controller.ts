@@ -6,43 +6,51 @@ import {
   Param,
   Patch,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { ResponseMessage } from '../common/decorators/response-message.decorator';
+import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
 
 @ApiTags('Users')
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @Get()
+  @ResponseMessage('Users retrieved successfully')
   @ApiOperation({ summary: 'Get all users' })
-  findAll() {
-    return this.usersService.findAll();
+  @Get()
+  findAll(@Query() query: PaginationQueryDto) {
+    return this.usersService.findAll(query);
   }
 
-  @Get(':id')
+  @ResponseMessage('User retrieved successfully')
   @ApiOperation({ summary: 'Get user by ID' })
+  @Get(':id')
   findOne(@Param('id') id: string) {
     return this.usersService.findOne(id);
   }
 
-  @Post()
+  @ResponseMessage('User created successfully')
   @ApiOperation({ summary: 'Create a new user' })
+  @Post()
   create(@Body() createUserDto: CreateUserDto) {
     return this.usersService.create(createUserDto);
   }
 
+  @ResponseMessage('User updated successfully')
+  @ApiOperation({ summary: 'Update user by ID' })
   @Patch(':id')
-  @ApiOperation({ summary: 'Update user by id' })
   update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
     return this.usersService.update(id, updateUserDto);
   }
 
+  @ResponseMessage('User deleted successfully')
+  @ApiOperation({ summary: 'Delete user by ID' })
   @Delete(':id')
-  @ApiOperation({ summary: 'Delete user by id' })
   remove(@Param('id') id: string) {
     return this.usersService.remove(id);
   }
