@@ -6,6 +6,7 @@ import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { CurrentUser } from './decorators/current-user.decorator';
+import { Public } from './decorators/public.decorator';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -13,6 +14,7 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   // Register a new user by accepting their name, email, and password, and creating them in the database
+  @Public()
   @ResponseMessage('User registered successfully')
   @ApiOperation({ summary: 'Register a new user' })
   @Post('register')
@@ -21,6 +23,8 @@ export class AuthController {
   }
 
   // Authenticate a user by accepting their email and password, verifying their credentials, and returning a JWT access token if successful
+
+  @Public()
   @ResponseMessage('User logged in successfully')
   @ApiOperation({ summary: 'Login a user' })
   @Post('login')
