@@ -52,4 +52,8 @@ export class AuthService {
       accessToken,
     };
   }
+
+  async me(user: { userId: string; email: string }) {
+    return this.usersService.findOne(user.userId);
+  }
 }
