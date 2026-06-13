@@ -107,6 +107,7 @@ export class UsersService {
     return user;
   }
 
+  // Update a user by ID, hashing the password if it's being updated
   async update(id: string, updateUserDto: UpdateUserDto) {
     await this.findOne(id); // Ensure the user exists before updating
 
@@ -123,6 +124,7 @@ export class UsersService {
     });
   }
 
+  // Delete a user by ID
   async remove(id: string) {
     await this.findOne(id);
 
@@ -131,5 +133,12 @@ export class UsersService {
     });
 
     return null;
+  }
+
+  // Find a user by email, used for authentication purposes
+  async findByEmail(email: string) {
+    return this.prisma.user.findUnique({
+      where: { email },
+    });
   }
 }
