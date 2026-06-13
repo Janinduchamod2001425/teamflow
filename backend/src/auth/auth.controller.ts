@@ -36,7 +36,6 @@ export class AuthController {
   @ResponseMessage('Current user retrieved successfully')
   @ApiOperation({ summary: 'Get current authenticated user' })
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
   @Get('me')
   me(@CurrentUser() user: any) {
     return this.authService.me(user);
