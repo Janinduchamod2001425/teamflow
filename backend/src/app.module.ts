@@ -12,6 +12,7 @@ import { WorkspaceMembersModule } from './workspace-members/workspace-members.mo
 import { WorkspaceAccessModule } from './workspace-access/workspace-access.module';
 import { ProjectsModule } from './projects/projects.module';
 import { TasksModule } from './tasks/tasks.module';
+import { CommentsModule } from './comments/comments.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { TasksModule } from './tasks/tasks.module';
     WorkspaceAccessModule,
     ProjectsModule,
     TasksModule,
+    CommentsModule,
   ],
   controllers: [],
   providers: [
