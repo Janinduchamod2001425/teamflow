@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+} from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiOperation,
@@ -9,6 +17,7 @@ import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { ResponseMessage } from '../common/decorators/response-message.decorator';
 import { InviteMemberDto } from './dto/invite-member.dto';
 import { WorkspaceMembersService } from './workspace-members.service';
+import { UpdateMemberRoleDto } from './dto/update-member-role.dto';
 
 @ApiBearerAuth()
 @ApiTags('Workspace Members')
@@ -41,5 +50,37 @@ export class WorkspaceMembersController {
     @Param('workspaceId') workspaceId: string,
   ) {
     return this.workspaceMembersService.findAll(user.userId, workspaceId);
+  }
+
+  @Patch(':memberId/role')
+  @ResponseMessage('Member role updated successfully')
+  @ApiOperation({ summary: 'Update workspace member role' })
+  updateRole(
+    @CurrentUser() user: { userId: string; email: string },
+    @Param('workspaceId') workspaceId: string,
+    @Param('memberId') memberId: string,
+    @Body() updateMemberRoleDto: UpdateMemberRoleDto,
+  ) {
+    return this.workspaceMembersService.updateRole(
+      user.userId,
+      workspaceId,
+      memberId,
+      updateMemberRoleDto.role,
+    );
+  }
+
+  @Delete(':memberId')
+  @ResponseMessage('Member removed successfully')
+  @ApiOperation({ summary: 'Remove workspace member' })
+  removeMember(
+    @CurrentUser() user: { userId: string; email: string },
+    @Param('workspaceId') workspaceId: string,
+    @Param('memberId') memberId: string,
+  ) {
+    return this.workspaceMembersService.removeMember(
+      user.userId,
+      workspaceId,
+      memberId,
+    );
   }
 }
