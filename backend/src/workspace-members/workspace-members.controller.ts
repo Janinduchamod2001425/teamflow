@@ -36,7 +36,10 @@ export class WorkspaceMembersController {
   @Get()
   @ResponseMessage('Workspace members retrieved successfully')
   @ApiOperation({ summary: 'Get workspace members' })
-  findAll(@Param('workspaceId') workspaceId: string) {
-    return this.workspaceMembersService.findAll(workspaceId);
+  findAll(
+    @CurrentUser() user: { userId: string; email: string },
+    @Param('workspaceId') workspaceId: string,
+  ) {
+    return this.workspaceMembersService.findAll(user.userId, workspaceId);
   }
 }

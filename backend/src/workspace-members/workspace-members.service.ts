@@ -1,19 +1,19 @@
 import {
   ConflictException,
-  ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { UsersService } from '../users/users.service';
 import { InviteMemberDto } from './dto/invite-member.dto';
-import { Role } from '@prisma/client';
+import { WorkspaceAccessService } from '../workspace-access/workspace-access.service';
 
 @Injectable()
 export class WorkspaceMembersService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly usersService: UsersService,
+    private workspaceAccessService: WorkspaceAccessService,
   ) {}
 
   async inviteMember(
@@ -21,20 +21,7 @@ export class WorkspaceMembersService {
     workspaceId: string,
     inviteMemberDto: InviteMemberDto,
   ) {
-    const currentMember = await this.prisma.workspaceMember.findFirst({
-      where: {
-        userId: currentUserId,
-        workspaceId,
-      },
-    });
-
-    if (!currentMember) {
-      throw new NotFoundException('Workspace not found');
-    }
-
-    if (currentMember.role !== Role.ADMIN) {
-      throw new ForbiddenException('Only workspace admins can invite members');
-    }
+    await this.workspaceAccessService.requireAdmin(currentUserId, workspaceId);
 
     const userToInvite = await this.usersService.findByEmail(
       inviteMemberDto.email,
@@ -76,7 +63,9 @@ export class WorkspaceMembersService {
     });
   }
 
-  async findAll(workspaceId: string) {
+  async findAll(currentUserId: string, workspaceId: string) {
+    await this.workspaceAccessService.requireMember(currentUserId, workspaceId);
+
     return this.prisma.workspaceMember.findMany({
       where: {
         workspaceId,
@@ -92,8 +81,8 @@ export class WorkspaceMembersService {
         },
       },
       orderBy: {
-        createdAt: 'asc'
-      }
+        createdAt: 'asc',
+      },
     });
   }
 }
