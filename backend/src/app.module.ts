@@ -8,6 +8,8 @@ import { AuthModule } from './auth/auth.module';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { WorkspacesModule } from './workspaces/workspaces.module';
+import { WorkspaceMembersModule } from './workspace-members/workspace-members.module';
+import { WorkspaceAccessModule } from './workspace-access/workspace-access.module';
 
 @Module({
   imports: [
@@ -19,6 +21,8 @@ import { WorkspacesModule } from './workspaces/workspaces.module';
     UsersModule,
     AuthModule,
     WorkspacesModule,
+    WorkspaceMembersModule,
+    WorkspaceAccessModule,
   ],
   controllers: [],
   providers: [
