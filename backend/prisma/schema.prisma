@@ -21,4 +21,36 @@ model User {
   avatarUrl String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  membership WorkspaceMember[]
+}
+
+model Workspace {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  members WorkspaceMember[]
+}
+
+model WorkspaceMember {
+  id          String @id @default(cuid())
+  role        Role   @default(MEMBER)
+  createdAt   DateTime @default(now())
+
+  userId      String
+  workspaceId String
+
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, workspaceId])
+}
+
+enum Role {
+  ADMIN
+  MANAGER
+  MEMBER
 }
