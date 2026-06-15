@@ -1,7 +1,10 @@
 import { Module } from '@nestjs/common';
 import { WorkspaceAccessService } from './workspace-access.service';
+import { PrismaModule } from '../prisma/prisma.module';
 
 @Module({
-  providers: [WorkspaceAccessService]
+  imports: [PrismaModule],
+  providers: [WorkspaceAccessService],
+  exports: [WorkspaceAccessService],
 })
 export class WorkspaceAccessModule {}
