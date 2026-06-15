@@ -10,6 +10,8 @@ import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { WorkspacesModule } from './workspaces/workspaces.module';
 import { WorkspaceMembersModule } from './workspace-members/workspace-members.module';
 import { WorkspaceAccessModule } from './workspace-access/workspace-access.module';
+import { ProjectsModule } from './projects/projects.module';
+import { TasksModule } from './tasks/tasks.module';
 
 @Module({
   imports: [
@@ -23,6 +25,8 @@ import { WorkspaceAccessModule } from './workspace-access/workspace-access.modul
     WorkspacesModule,
     WorkspaceMembersModule,
     WorkspaceAccessModule,
+    ProjectsModule,
+    TasksModule,
   ],
   controllers: [],
   providers: [
