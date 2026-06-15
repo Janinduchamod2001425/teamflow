@@ -7,6 +7,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { UsersService } from '../users/users.service';
 import { InviteMemberDto } from './dto/invite-member.dto';
 import { WorkspaceAccessService } from '../workspace-access/workspace-access.service';
+import { Role } from '@prisma/client';
 
 @Injectable()
 export class WorkspaceMembersService {
@@ -84,5 +85,71 @@ export class WorkspaceMembersService {
         createdAt: 'asc',
       },
     });
+  }
+
+  async updateRole(
+    currentUserId: string,
+    workspaceId: string,
+    memberId: string,
+    role: Role,
+  ) {
+    await this.workspaceAccessService.requireAdmin(currentUserId, workspaceId);
+
+    const member = await this.prisma.workspaceMember.findFirst({
+      where: {
+        id: memberId,
+        workspaceId,
+      },
+    });
+
+    if (!member) {
+      throw new NotFoundException('Workspace member not found');
+    }
+
+    return this.prisma.workspaceMember.update({
+      where: {
+        id: memberId,
+      },
+      data: {
+        role,
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            avatarUrl: true,
+          },
+        },
+      },
+    });
+  }
+
+  async removeMember(
+    currentUserId: string,
+    workspaceId: string,
+    memberId: string,
+  ) {
+    await this.workspaceAccessService.requireAdmin(currentUserId, workspaceId);
+
+    const member = await this.prisma.workspaceMember.findFirst({
+      where: {
+        id: memberId,
+        workspaceId,
+      },
+    });
+
+    if (!member) {
+      throw new NotFoundException('Workspace member not found');
+    }
+
+    await this.prisma.workspaceMember.delete({
+      where: {
+        id: memberId,
+      },
+    });
+
+    return null;
   }
 }
