@@ -3,7 +3,8 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { Role } from '@prisma/client';
+import { ActivityAction, Role } from '@prisma/client';
+import { ActivitiesService } from '../activities/activities.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { WorkspaceAccessService } from '../workspace-access/workspace-access.service';
 import { CreateTaskDto } from './dto/create-task.dto';
@@ -15,6 +16,7 @@ export class TasksService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly workspaceAccessService: WorkspaceAccessService,
+    private readonly activitiesService: ActivitiesService,
   ) {}
 
   async create(
@@ -34,7 +36,7 @@ export class TasksService {
       );
     }
 
-    return this.prisma.task.create({
+    const task = await this.prisma.task.create({
       data: {
         title: createTaskDto.title,
         description: createTaskDto.description,
@@ -46,6 +48,20 @@ export class TasksService {
       },
       include: this.taskInclude(),
     });
+
+    await this.activitiesService.createActivity({
+      workspaceId,
+      userId,
+      action: ActivityAction.TASK_CREATED,
+      description: `Created task "${task.title}"`,
+      metadata: {
+        taskId: task.id,
+        taskTitle: task.title,
+        projectId,
+      },
+    });
+
+    return task;
   }
 
   async findAll(userId: string, workspaceId: string, projectId: string) {
@@ -109,7 +125,7 @@ export class TasksService {
       );
     }
 
-    return this.prisma.task.update({
+    const task = await this.prisma.task.update({
       where: {
         id: taskId,
       },
@@ -124,6 +140,20 @@ export class TasksService {
       },
       include: this.taskInclude(),
     });
+
+    await this.activitiesService.createActivity({
+      workspaceId,
+      userId,
+      action: ActivityAction.TASK_UPDATED,
+      description: `Updated task "${task.title}"`,
+      metadata: {
+        taskId: task.id,
+        taskTitle: task.title,
+        projectId,
+      },
+    });
+
+    return task;
   }
 
   async updateStatus(
@@ -139,7 +169,7 @@ export class TasksService {
 
     await this.findOne(userId, workspaceId, projectId, taskId);
 
-    return this.prisma.task.update({
+    const task = await this.prisma.task.update({
       where: {
         id: taskId,
       },
@@ -148,6 +178,21 @@ export class TasksService {
       },
       include: this.taskInclude(),
     });
+
+    await this.activitiesService.createActivity({
+      workspaceId,
+      userId,
+      action: ActivityAction.TASK_STATUS_UPDATED,
+      description: `Moved task "${task.title}" to ${task.status}`,
+      metadata: {
+        taskId: task.id,
+        taskTitle: task.title,
+        status: task.status,
+        projectId,
+      },
+    });
+
+    return task;
   }
 
   async remove(
@@ -163,11 +208,23 @@ export class TasksService {
 
     await this.ensureProjectBelongsToWorkspace(projectId, workspaceId);
 
-    await this.findOne(userId, workspaceId, projectId, taskId);
+    const task = await this.findOne(userId, workspaceId, projectId, taskId);
 
     await this.prisma.task.delete({
       where: {
         id: taskId,
+      },
+    });
+
+    await this.activitiesService.createActivity({
+      workspaceId,
+      userId,
+      action: ActivityAction.TASK_DELETED,
+      description: `Deleted task "${task.title}"`,
+      metadata: {
+        taskId: task.id,
+        taskTitle: task.title,
+        projectId,
       },
     });
 
