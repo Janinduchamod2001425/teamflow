@@ -27,6 +27,7 @@ model User {
   createdTasks  Task[] @relation("CreatedTasks")
 
   comments Comment[]
+  activityLogs ActivityLog[]
 }
 
 model Workspace {
@@ -37,8 +38,8 @@ model Workspace {
   updatedAt   DateTime @updatedAt
 
   members WorkspaceMember[]
-
   projects Project[]
+  activityLogs ActivityLog[]
 }
 
 model WorkspaceMember {
@@ -122,4 +123,35 @@ model Comment {
 
   task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+enum ActivityAction {
+  WORKSPACE_CREATED
+  MEMBER_INVITED
+  MEMBER_ROLE_UPDATED
+  MEMBER_REMOVED
+  PROJECT_CREATED
+  PROJECT_UPDATED
+  PROJECT_DELETED
+  TASK_CREATED
+  TASK_UPDATED
+  TASK_STATUS_UPDATED
+  TASK_DELETED
+  COMMENT_CREATED
+  COMMENT_UPDATED
+  COMMENT_DELETED
+}
+
+model ActivityLog {
+  id          String         @id @default(cuid())
+  action      ActivityAction
+  description String
+  metadata    Json?
+  createdAt   DateTime       @default(now())
+
+  workspaceId String
+  userId      String
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
