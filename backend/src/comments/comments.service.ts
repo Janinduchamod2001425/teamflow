@@ -7,12 +7,15 @@ import { PrismaService } from '../prisma/prisma.service';
 import { WorkspaceAccessService } from '../workspace-access/workspace-access.service';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
+import { ActivitiesService } from '../activities/activities.service';
+import { ActivityAction } from '@prisma/client';
 
 @Injectable()
 export class CommentsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly workspaceAccessService: WorkspaceAccessService,
+    private readonly activitiesService: ActivitiesService,
   ) {}
 
   async create(
@@ -26,7 +29,7 @@ export class CommentsService {
 
     await this.ensureTaskBelongsToProject(workspaceId, projectId, taskId);
 
-    return this.prisma.comment.create({
+    const comment = await this.prisma.comment.create({
       data: {
         content: createCommentDto.content,
         taskId,
@@ -34,6 +37,20 @@ export class CommentsService {
       },
       include: this.commentInclude(),
     });
+
+    await this.activitiesService.createActivity({
+      workspaceId,
+      userId,
+      action: ActivityAction.COMMENT_CREATED,
+      description: 'Added a comment to a task',
+      metadata: {
+        commentId: comment.id,
+        taskId,
+        projectId,
+      },
+    });
+
+    return comment;
   }
 
   async findAll(
@@ -75,7 +92,7 @@ export class CommentsService {
       throw new ForbiddenException('You can only update your own comment');
     }
 
-    return this.prisma.comment.update({
+    const updatedComment = await this.prisma.comment.update({
       where: {
         id: commentId,
       },
@@ -84,6 +101,20 @@ export class CommentsService {
       },
       include: this.commentInclude(),
     });
+
+    await this.activitiesService.createActivity({
+      workspaceId,
+      userId,
+      action: ActivityAction.COMMENT_UPDATED,
+      description: 'Updated a comment',
+      metadata: {
+        commentId: updatedComment.id,
+        taskId,
+        projectId,
+      },
+    });
+
+    return updatedComment;
   }
 
   async remove(
@@ -115,9 +146,15 @@ export class CommentsService {
       );
     }
 
-    await this.prisma.comment.delete({
-      where: {
-        id: commentId,
+    await this.activitiesService.createActivity({
+      workspaceId,
+      userId,
+      action: ActivityAction.COMMENT_DELETED,
+      description: 'Deleted a comment',
+      metadata: {
+        commentId: comment.id,
+        taskId,
+        projectId,
       },
     });
 
