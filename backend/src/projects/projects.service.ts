@@ -2,14 +2,16 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { WorkspaceAccessService } from '../workspace-access/workspace-access.service';
 import { CreateProjectDto } from './dto/create-project.dto';
-import { Role } from '@prisma/client';
+import { ActivityAction, Role } from '@prisma/client';
 import { UpdateProjectDto } from './dto/update-project.dto';
+import { ActivitiesService } from '../activities/activities.service';
 
 @Injectable()
 export class ProjectsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly workspaceAccessService: WorkspaceAccessService,
+    private readonly activitiesService: ActivitiesService,
   ) {}
 
   async create(
@@ -22,7 +24,7 @@ export class ProjectsService {
       Role.MANAGER,
     ]);
 
-    return this.prisma.project.create({
+    const project = await this.prisma.project.create({
       data: {
         name: createProjectDto.name,
         description: createProjectDto.description,
@@ -30,6 +32,19 @@ export class ProjectsService {
         workspaceId,
       },
     });
+
+    await this.activitiesService.createActivity({
+      workspaceId,
+      userId,
+      action: ActivityAction.PROJECT_CREATED,
+      description: `Created project "${project.name}"`,
+      metadata: {
+        projectId: project.id,
+        projectName: project.name,
+      },
+    });
+
+    return project;
   }
 
   async findAll(userId: string, workspaceId: string) {
@@ -75,12 +90,25 @@ export class ProjectsService {
 
     await this.findOne(userId, workspaceId, projectId);
 
-    return this.prisma.project.update({
+    const project = await this.prisma.project.update({
       where: {
         id: projectId,
       },
       data: updateProjectDto,
     });
+
+    await this.activitiesService.createActivity({
+      workspaceId,
+      userId,
+      action: ActivityAction.PROJECT_UPDATED,
+      description: `Updated project "${project.name}"`,
+      metadata: {
+        projectId: project.id,
+        projectName: project.name,
+      },
+    });
+
+    return project;
   }
 
   async remove(userId: string, workspaceId: string, projectId: string) {
@@ -89,11 +117,22 @@ export class ProjectsService {
       Role.MANAGER,
     ]);
 
-    await this.findOne(userId, workspaceId, projectId);
+    const project = await this.findOne(userId, workspaceId, projectId);
 
     await this.prisma.project.delete({
       where: {
         id: projectId,
+      },
+    });
+
+    await this.activitiesService.createActivity({
+      workspaceId,
+      userId,
+      action: ActivityAction.PROJECT_DELETED,
+      description: `Deleted project "${project.name}"`,
+      metadata: {
+        projectId: project.id,
+        projectName: project.name,
       },
     });
 
