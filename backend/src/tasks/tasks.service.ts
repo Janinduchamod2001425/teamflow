@@ -11,6 +11,7 @@ import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskStatusDto } from './dto/update-task-status.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { SearchTaskDto } from './dto/search-task.dto';
+import { NotificationsService } from '../notifications/notifications.service';
 
 @Injectable()
 export class TasksService {
@@ -18,6 +19,7 @@ export class TasksService {
     private readonly prisma: PrismaService,
     private readonly workspaceAccessService: WorkspaceAccessService,
     private readonly activitiesService: ActivitiesService,
+    private readonly notificationsService: NotificationsService,
   ) {}
 
   async create(
@@ -61,6 +63,15 @@ export class TasksService {
         projectId,
       },
     });
+
+    if (task.assigneeId && task.assigneeId !== userId) {
+      await this.notificationsService.createForUser({
+        userId: task.assigneeId,
+        title: 'New Task Assigned',
+        message: `You have been assigned to task "${task.title}"`,
+        type: 'TASK_ASSIGNED',
+      });
+    }
 
     return task;
   }
@@ -234,6 +245,15 @@ export class TasksService {
       },
     });
 
+    if (task.assigneeId && task.assigneeId !== userId) {
+      await this.notificationsService.createForUser({
+        userId: task.assigneeId,
+        title: 'Task Updated',
+        message: `Task "${task.title}" was updated`,
+        type: 'TASK_UPDATED',
+      });
+    }
+
     return task;
   }
 
@@ -272,6 +292,15 @@ export class TasksService {
         projectId,
       },
     });
+
+    if (task.assigneeId && task.assigneeId !== userId) {
+      await this.notificationsService.createForUser({
+        userId: task.assigneeId,
+        title: 'Task Status Updated',
+        message: `Task "${task.title}" moved to ${task.status}`,
+        type: 'TASK_STATUS_UPDATED',
+      });
+    }
 
     return task;
   }
