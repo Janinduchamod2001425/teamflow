@@ -3,9 +3,10 @@ import { WorkspaceAccessModule } from '../workspace-access/workspace-access.modu
 import { CommentsController } from './comments.controller';
 import { CommentsService } from './comments.service';
 import { ActivitiesModule } from '../activities/activities.module';
+import { NotificationsModule } from '../notifications/notifications.module';
 
 @Module({
-  imports: [WorkspaceAccessModule, ActivitiesModule],
+  imports: [WorkspaceAccessModule, ActivitiesModule, NotificationsModule],
   controllers: [CommentsController],
   providers: [CommentsService],
 })
