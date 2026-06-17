@@ -8,6 +8,7 @@ import { UsersService } from '../users/users.service';
 import { InviteMemberDto } from './dto/invite-member.dto';
 import { WorkspaceAccessService } from '../workspace-access/workspace-access.service';
 import { Role } from '@prisma/client';
+import { NotificationsService } from '../notifications/notifications.service';
 
 @Injectable()
 export class WorkspaceMembersService {
@@ -15,6 +16,7 @@ export class WorkspaceMembersService {
     private readonly prisma: PrismaService,
     private readonly usersService: UsersService,
     private workspaceAccessService: WorkspaceAccessService,
+    private readonly notificationsService: NotificationsService,
   ) {}
 
   async inviteMember(
@@ -43,7 +45,7 @@ export class WorkspaceMembersService {
       throw new ConflictException('User is already a member of this workspace');
     }
 
-    return this.prisma.workspaceMember.create({
+    const member = await this.prisma.workspaceMember.create({
       data: {
         userId: userToInvite.id,
         workspaceId,
@@ -62,6 +64,15 @@ export class WorkspaceMembersService {
         workspace: true,
       },
     });
+
+    await this.notificationsService.createForUser({
+      userId: userToInvite.id,
+      title: 'Workspace Invitation',
+      message: `You have been invited to workspace "${member.workspace.name}" as ${member.role}`,
+      type: 'WORKSPACE_INVITE',
+    });
+
+    return member;
   }
 
   async findAll(currentUserId: string, workspaceId: string) {
