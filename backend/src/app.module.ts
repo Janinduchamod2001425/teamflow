@@ -17,6 +17,7 @@ import { ActivitiesModule } from './activities/activities.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { AttachmentsModule } from './attachments/attachments.module';
+import { CacheModule } from './cache/cache.module';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { AttachmentsModule } from './attachments/attachments.module';
     NotificationsModule,
     DashboardModule,
     AttachmentsModule,
+    CacheModule,
   ],
   controllers: [],
   providers: [
