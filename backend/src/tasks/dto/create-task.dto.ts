@@ -33,4 +33,9 @@ export class CreateTaskDto {
   @IsString()
   @IsOptional()
   assigneeId?: string;
+
+  @ApiProperty({ example: 'project_id_here' })
+  @IsString()
+  @IsNotEmpty()
+  projectId: string;
 }
