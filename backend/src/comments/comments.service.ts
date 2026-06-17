@@ -9,6 +9,7 @@ import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
 import { ActivitiesService } from '../activities/activities.service';
 import { ActivityAction } from '@prisma/client';
+import { NotificationsService } from '../notifications/notifications.service';
 
 @Injectable()
 export class CommentsService {
@@ -16,6 +17,7 @@ export class CommentsService {
     private readonly prisma: PrismaService,
     private readonly workspaceAccessService: WorkspaceAccessService,
     private readonly activitiesService: ActivitiesService,
+    private readonly notificationsService: NotificationsService,
   ) {}
 
   async create(
@@ -49,6 +51,19 @@ export class CommentsService {
         projectId,
       },
     });
+
+    const task = await this.prisma.task.findUnique({
+      where: { id: taskId },
+    });
+
+    if (task?.assigneeId && task.assigneeId !== userId) {
+      await this.notificationsService.createForUser({
+        userId: task.assigneeId,
+        title: 'New Comment',
+        message: `A new comment was added to task "${task.title}"`,
+        type: 'COMMENT_CREATED',
+      });
+    }
 
     return comment;
   }
