@@ -2,16 +2,26 @@ import { Injectable } from '@nestjs/common';
 import { TaskStatus } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { WorkspaceAccessService } from '../workspace-access/workspace-access.service';
+import { CacheService } from '../cache/cache.service';
 
 @Injectable()
 export class DashboardService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly workspaceAccessService: WorkspaceAccessService,
+    private readonly cacheService: CacheService,
   ) {}
 
   async getWorkspaceDashboard(userId: string, workspaceId: string) {
     await this.workspaceAccessService.requireMember(userId, workspaceId);
+
+    const cacheKey = `dashboard:${workspaceId}`;
+
+    const cachedDashboard = await this.cacheService.get(cacheKey);
+
+    if (cachedDashboard) {
+      return cachedDashboard;
+    }
 
     const [
       totalProjects,
@@ -100,7 +110,7 @@ export class DashboardService {
         ? 0
         : Number(((completedTasks / totalTasks) * 100).toFixed(2));
 
-    return {
+    const dashboard = {
       overview: {
         totalProjects,
         totalMembers,
@@ -117,5 +127,9 @@ export class DashboardService {
       },
       recentActivities,
     };
+
+    await this.cacheService.set(cacheKey, dashboard, 60);
+
+    return dashboard;
   }
 }
