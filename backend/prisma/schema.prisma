@@ -30,6 +30,8 @@ model User {
   activityLogs ActivityLog[]
 
   notifications Notification[]
+
+  attachments Attachment[]
 }
 
 model Workspace {
@@ -112,6 +114,7 @@ model Task {
   createdBy User    @relation("CreatedTasks", fields: [createdById], references: [id])
 
   comments Comment[]
+  attachments Attachment[]
 }
 
 model Comment {
@@ -168,4 +171,20 @@ model Notification {
 
   userId String
   user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Attachment {
+  id           String   @id @default(cuid())
+  originalName String
+  fileName     String
+  filePath     String
+  mimeType     String
+  size         Int
+  createdAt    DateTime @default(now())
+
+  taskId     String
+  uploadedBy String
+
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [uploadedBy], references: [id], onDelete: Cascade)
 }
