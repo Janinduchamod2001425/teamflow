@@ -28,6 +28,8 @@ model User {
 
   comments Comment[]
   activityLogs ActivityLog[]
+
+  notifications Notification[]
 }
 
 model Workspace {
@@ -154,4 +156,16 @@ model ActivityLog {
 
   workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  title     String
+  message   String
+  type      String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  userId String
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
