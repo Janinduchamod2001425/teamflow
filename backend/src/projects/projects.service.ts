@@ -5,6 +5,7 @@ import { CreateProjectDto } from './dto/create-project.dto';
 import { ActivityAction, Role } from '@prisma/client';
 import { UpdateProjectDto } from './dto/update-project.dto';
 import { ActivitiesService } from '../activities/activities.service';
+import { CacheService } from '../cache/cache.service';
 
 @Injectable()
 export class ProjectsService {
@@ -12,6 +13,7 @@ export class ProjectsService {
     private readonly prisma: PrismaService,
     private readonly workspaceAccessService: WorkspaceAccessService,
     private readonly activitiesService: ActivitiesService,
+    private readonly cacheService: CacheService,
   ) {}
 
   async create(
@@ -43,6 +45,8 @@ export class ProjectsService {
         projectName: project.name,
       },
     });
+
+    await this.cacheService.delete(`dashboard:${workspaceId}`);
 
     return project;
   }
@@ -108,6 +112,8 @@ export class ProjectsService {
       },
     });
 
+    await this.cacheService.delete(`dashboard:${workspaceId}`);
+
     return project;
   }
 
@@ -135,6 +141,8 @@ export class ProjectsService {
         projectName: project.name,
       },
     });
+
+    await this.cacheService.delete(`dashboard:${workspaceId}`);
 
     return null;
   }
