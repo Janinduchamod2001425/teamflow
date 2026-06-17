@@ -10,6 +10,7 @@ import { UpdateCommentDto } from './dto/update-comment.dto';
 import { ActivitiesService } from '../activities/activities.service';
 import { ActivityAction } from '@prisma/client';
 import { NotificationsService } from '../notifications/notifications.service';
+import { CacheService } from '../cache/cache.service';
 
 @Injectable()
 export class CommentsService {
@@ -18,6 +19,7 @@ export class CommentsService {
     private readonly workspaceAccessService: WorkspaceAccessService,
     private readonly activitiesService: ActivitiesService,
     private readonly notificationsService: NotificationsService,
+    private readonly cacheService: CacheService,
   ) {}
 
   async create(
@@ -64,6 +66,8 @@ export class CommentsService {
         type: 'COMMENT_CREATED',
       });
     }
+
+    await this.cacheService.delete(`dashboard:${workspaceId}`);
 
     return comment;
   }
@@ -129,6 +133,8 @@ export class CommentsService {
       },
     });
 
+    await this.cacheService.delete(`dashboard:${workspaceId}`);
+
     return updatedComment;
   }
 
@@ -172,6 +178,8 @@ export class CommentsService {
         projectId,
       },
     });
+
+    await this.cacheService.delete(`dashboard:${workspaceId}`);
 
     return null;
   }
