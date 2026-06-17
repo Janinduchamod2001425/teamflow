@@ -31,6 +31,20 @@ export class NotificationsGateway
     this.logger.log(`Client disconnected: ${client.id}`);
   }
 
+  @SubscribeMessage('user.join')
+  handleJoinUser(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() payload: { userId: string },
+  ) {
+    const room = this.getUserRoom(payload.userId);
+    client.join(room);
+
+    client.emit('user.joined', {
+      userId: payload.userId,
+      room,
+    });
+  }
+
   @SubscribeMessage('workspace.join')
   handleJoinWorkspace(
     @ConnectedSocket() client: Socket,
@@ -64,7 +78,16 @@ export class NotificationsGateway
     this.server.to(room).emit(event, data);
   }
 
+  emitToUser(userId: string, event: string, data: any) {
+    const room = this.getUserRoom(userId);
+    this.server.to(room).emit(event, data);
+  }
+
   private getWorkspaceRoom(workspaceId: string) {
     return `workspace:${workspaceId}`;
+  }
+
+  private getUserRoom(userId: string) {
+    return `user:${userId}`;
   }
 }
