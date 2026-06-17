@@ -3,13 +3,14 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { ActivityAction, Role } from '@prisma/client';
+import { ActivityAction, Prisma, Role } from '@prisma/client';
 import { ActivitiesService } from '../activities/activities.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { WorkspaceAccessService } from '../workspace-access/workspace-access.service';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskStatusDto } from './dto/update-task-status.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
+import { SearchTaskDto } from './dto/search-task.dto';
 
 @Injectable()
 export class TasksService {
@@ -78,6 +79,86 @@ export class TasksService {
         createdAt: 'desc',
       },
     });
+  }
+
+  async search(userId: string, workspaceId: string, searchDto: SearchTaskDto) {
+    await this.workspaceAccessService.requireMember(userId, workspaceId);
+
+    const where: Prisma.TaskWhereInput = {
+      project: {
+        workspaceId,
+      },
+    };
+
+    if (searchDto.keyword) {
+      where.OR = [
+        {
+          title: {
+            contains: searchDto.keyword,
+            mode: 'insensitive',
+          },
+        },
+        {
+          description: {
+            contains: searchDto.keyword,
+            mode: 'insensitive',
+          },
+        },
+      ];
+    }
+
+    if (searchDto.status) {
+      where.status = searchDto.status;
+    }
+
+    if (searchDto.priority) {
+      where.priority = searchDto.priority;
+    }
+
+    if (searchDto.assigneeId) {
+      where.assigneeId = searchDto.assigneeId;
+    }
+
+    if (searchDto.projectId) {
+      where.projectId = searchDto.projectId;
+    }
+
+    if (searchDto.dueBefore) {
+      where.dueDate = {
+        lte: new Date(searchDto.dueBefore),
+      };
+    }
+
+    const page = Number(searchDto.page ?? 1);
+    const limit = Number(searchDto.limit ?? 10);
+
+    const skip = (page - 1) * limit;
+
+    const [tasks, total] = await Promise.all([
+      this.prisma.task.findMany({
+        where,
+        skip,
+        take: limit,
+        include: this.taskInclude(),
+        orderBy: {
+          [searchDto.sortBy ?? 'createdAt']: searchDto.order ?? 'desc',
+        },
+      }),
+
+      this.prisma.task.count({
+        where,
+      }),
+    ]);
+
+    return {
+      items: tasks,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
   }
 
   async findOne(
@@ -229,6 +310,28 @@ export class TasksService {
     });
 
     return null;
+  }
+
+  async getBoard(userId: string, workspaceId: string, projectId: string) {
+    await this.workspaceAccessService.requireMember(userId, workspaceId);
+    await this.ensureProjectBelongsToWorkspace(projectId, workspaceId);
+
+    const tasks = await this.prisma.task.findMany({
+      where: {
+        projectId,
+      },
+      include: this.taskInclude(),
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+
+    return {
+      TODO: tasks.filter((task) => task.status === 'TODO'),
+      IN_PROGRESS: tasks.filter((task) => task.status === 'IN_PROGRESS'),
+      REVIEW: tasks.filter((task) => task.status === 'REVIEW'),
+      DONE: tasks.filter((task) => task.status === 'DONE'),
+    };
   }
 
   private async ensureProjectBelongsToWorkspace(
