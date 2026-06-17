@@ -6,6 +6,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
@@ -14,10 +15,11 @@ import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskStatusDto } from './dto/update-task-status.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { TasksService } from './tasks.service';
+import { SearchTaskDto } from './dto/search-task.dto';
 
 @ApiBearerAuth()
 @ApiTags('Tasks')
-@Controller('workspaces/:workspaceId/projects/:projectId/tasks')
+@Controller('workspaces/:workspaceId/tasks')
 export class TasksController {
   constructor(private readonly tasksService: TasksService) {}
 
@@ -33,7 +35,7 @@ export class TasksController {
     return this.tasksService.create(
       user.userId,
       workspaceId,
-      projectId,
+      createTaskDto.projectId,
       createTaskDto,
     );
   }
@@ -44,9 +46,31 @@ export class TasksController {
   findAll(
     @CurrentUser() user: { userId: string; email: string },
     @Param('workspaceId') workspaceId: string,
-    @Param('projectId') projectId: string,
+    @Query('projectId') projectId: string,
   ) {
     return this.tasksService.findAll(user.userId, workspaceId, projectId);
+  }
+
+  @Get('board')
+  @ResponseMessage('Kanban board retrieved successfully')
+  @ApiOperation({ summary: 'Get project Kanban board' })
+  getBoard(
+    @CurrentUser() user: { userId: string; email: string },
+    @Param('workspaceId') workspaceId: string,
+    @Query('projectId') projectId: string,
+  ) {
+    return this.tasksService.getBoard(user.userId, workspaceId, projectId);
+  }
+
+  @Get('search')
+  @ResponseMessage('Tasks retrieved successfully')
+  @ApiOperation({ summary: 'Search tasks' })
+  search(
+    @CurrentUser() user: { userId: string; email: string },
+    @Param('workspaceId') workspaceId: string,
+    @Query() searchDto: SearchTaskDto,
+  ) {
+    return this.tasksService.search(user.userId, workspaceId, searchDto);
   }
 
   @Get(':taskId')
