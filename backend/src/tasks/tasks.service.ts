@@ -12,6 +12,7 @@ import { UpdateTaskStatusDto } from './dto/update-task-status.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { SearchTaskDto } from './dto/search-task.dto';
 import { NotificationsService } from '../notifications/notifications.service';
+import { CacheService } from '../cache/cache.service';
 
 @Injectable()
 export class TasksService {
@@ -20,6 +21,7 @@ export class TasksService {
     private readonly workspaceAccessService: WorkspaceAccessService,
     private readonly activitiesService: ActivitiesService,
     private readonly notificationsService: NotificationsService,
+    private readonly cacheService: CacheService,
   ) {}
 
   async create(
@@ -72,6 +74,8 @@ export class TasksService {
         type: 'TASK_ASSIGNED',
       });
     }
+
+    await this.cacheService.delete(`dashboard:${workspaceId}`);
 
     return task;
   }
@@ -254,6 +258,8 @@ export class TasksService {
       });
     }
 
+    await this.cacheService.delete(`dashboard:${workspaceId}`);
+
     return task;
   }
 
@@ -302,6 +308,8 @@ export class TasksService {
       });
     }
 
+    await this.cacheService.delete(`dashboard:${workspaceId}`);
+
     return task;
   }
 
@@ -337,6 +345,8 @@ export class TasksService {
         projectId,
       },
     });
+
+    await this.cacheService.delete(`dashboard:${workspaceId}`);
 
     return null;
   }
