@@ -1,5 +1,20 @@
-// https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
-  compatibilityDate: '2025-07-15',
-  devtools: { enabled: true }
-})
+  compatibilityDate: "2026-06-18",
+
+  devtools: {
+    enabled: true,
+  },
+
+  experimental: {
+    appManifest: false,
+  },
+
+  modules: ["@pinia/nuxt", "@nuxtjs/tailwindcss"],
+
+  runtimeConfig: {
+    public: {
+      apiBaseUrl: "http://localhost:3000/api/v1",
+      socketUrl: "http://localhost:3000",
+    },
+  },
+});
