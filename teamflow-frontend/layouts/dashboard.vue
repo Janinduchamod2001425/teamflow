@@ -1,13 +1,28 @@
 <template>
   <div class="min-h-screen bg-slate-50">
-    <Sidebar />
+    <LayoutSidebar
+      :is-collapsed="isSidebarCollapsed"
+      :is-open="isSidebarOpen"
+      @close="isSidebarOpen = false"
+      @toggle-collapse="isSidebarCollapsed = !isSidebarCollapsed"
+    />
 
-    <div class="ml-64 min-h-screen">
-      <Topbar />
+    <div
+      :class="[
+        'min-h-screen transition-all duration-300',
+        isSidebarCollapsed ? 'lg:ml-20' : 'lg:ml-64',
+      ]"
+    >
+      <LayoutTopbar @toggle-sidebar="isSidebarOpen = true" />
 
-      <PageContainer>
+      <LayoutPageContainer>
         <slot />
-      </PageContainer>
+      </LayoutPageContainer>
     </div>
   </div>
 </template>
+
+<script lang="ts" setup>
+const isSidebarOpen = ref(false);
+const isSidebarCollapsed = ref(false);
+</script>
