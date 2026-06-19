@@ -49,8 +49,14 @@
         <NuxtLink
           v-for="item in navItems"
           :key="item.to"
+          :class="[
+            'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition',
+            route.path.startsWith(item.to)
+              ? 'bg-indigo-50 text-indigo-600'
+              : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900',
+            isCollapsed ? 'justify-center' : '',
+          ]"
           :to="item.to"
-          class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-slate-600 hover:bg-indigo-50 hover:text-indigo-600"
           @click="$emit('close')"
         >
           <component :is="item.icon" class="h-5 w-5 shrink-0" />
@@ -84,6 +90,8 @@ defineEmits<{
   close: [];
   toggleCollapse: [];
 }>();
+
+const route = useRoute();
 
 const navItems = [
   { label: "Dashboard", to: "/dashboard", icon: LayoutDashboard },
