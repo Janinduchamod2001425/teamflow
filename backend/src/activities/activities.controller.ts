@@ -12,7 +12,7 @@ export class ActivitiesController {
 
   @Get()
   @ResponseMessage('Workspace activities retrieved successfully')
-  @ApiOperation({ summary: 'Get workspace activities' })
+  @ApiOperation({ summary: 'Get workspaces activities' })
   findWorkspaceActivities(
     @CurrentUser() user: { userId: string; email: string },
     @Param('workspaceId') workspaceId: string,
