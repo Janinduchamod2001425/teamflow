@@ -21,7 +21,7 @@ export class WorkspacesController {
   constructor(private readonly workspacesService: WorkspacesService) {}
 
   @ResponseMessage('Workspace created successfully')
-  @ApiOperation({ summary: 'Create a new workspace' })
+  @ApiOperation({ summary: 'Create a new workspaces' })
   @Post()
   create(
     @CurrentUser() user: { userId: string; email: string },
@@ -39,7 +39,7 @@ export class WorkspacesController {
 
   @Get(':id')
   @ResponseMessage('Workspace retrieved successfully')
-  @ApiOperation({ summary: 'Get workspace by ID' })
+  @ApiOperation({ summary: 'Get workspaces by ID' })
   findOne(
     @CurrentUser() user: { userId: string; email: string },
     @Param('id') id: string,
@@ -49,7 +49,7 @@ export class WorkspacesController {
 
   @Patch(':id')
   @ResponseMessage('Workspace updated successfully')
-  @ApiOperation({ summary: 'Update workspace by ID' })
+  @ApiOperation({ summary: 'Update workspaces by ID' })
   update(
     @CurrentUser() user: { userId: string; email: string },
     @Param('id') id: string,
@@ -60,7 +60,7 @@ export class WorkspacesController {
 
   @Delete(':id')
   @ResponseMessage('Workspace deleted successfully')
-  @ApiOperation({ summary: 'Delete workspace by ID' })
+  @ApiOperation({ summary: 'Delete workspaces by ID' })
   remove(
     @CurrentUser() user: { userId: string; email: string },
     @Param('id') id: string,
