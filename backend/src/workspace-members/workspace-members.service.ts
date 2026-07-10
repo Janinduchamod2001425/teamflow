@@ -42,7 +42,9 @@ export class WorkspaceMembersService {
     });
 
     if (existingUser) {
-      throw new ConflictException('User is already a member of this workspace');
+      throw new ConflictException(
+        'User is already a member of this workspaces',
+      );
     }
 
     const member = await this.prisma.workspaceMember.create({
