@@ -28,7 +28,7 @@ export class WorkspaceMembersController {
   ) {}
 
   @ResponseMessage('Member invited successfully')
-  @ApiOperation({ summary: 'Invite member to workspace' })
+  @ApiOperation({ summary: 'Invite member to workspaces' })
   @Post()
   inviteMember(
     @CurrentUser() user: { userId: string; email: string },
@@ -44,7 +44,7 @@ export class WorkspaceMembersController {
 
   @Get()
   @ResponseMessage('Workspace members retrieved successfully')
-  @ApiOperation({ summary: 'Get workspace members' })
+  @ApiOperation({ summary: 'Get workspaces members' })
   findAll(
     @CurrentUser() user: { userId: string; email: string },
     @Param('workspaceId') workspaceId: string,
@@ -54,7 +54,7 @@ export class WorkspaceMembersController {
 
   @Patch(':memberId/role')
   @ResponseMessage('Member role updated successfully')
-  @ApiOperation({ summary: 'Update workspace member role' })
+  @ApiOperation({ summary: 'Update workspaces member role' })
   updateRole(
     @CurrentUser() user: { userId: string; email: string },
     @Param('workspaceId') workspaceId: string,
@@ -71,7 +71,7 @@ export class WorkspaceMembersController {
 
   @Delete(':memberId')
   @ResponseMessage('Member removed successfully')
-  @ApiOperation({ summary: 'Remove workspace member' })
+  @ApiOperation({ summary: 'Remove workspaces member' })
   removeMember(
     @CurrentUser() user: { userId: string; email: string },
     @Param('workspaceId') workspaceId: string,
