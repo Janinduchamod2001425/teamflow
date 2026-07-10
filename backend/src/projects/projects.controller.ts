@@ -27,7 +27,7 @@ export class ProjectsController {
 
   @Post()
   @ResponseMessage('Project created successfully')
-  @ApiOperation({ summary: 'Create project in workspace' })
+  @ApiOperation({ summary: 'Create project in workspaces' })
   create(
     @CurrentUser() user: { userId: string; email: string },
     @Param('workspaceId') workspaceId: string,
@@ -42,7 +42,7 @@ export class ProjectsController {
 
   @Get()
   @ResponseMessage('Project retrieved successfully')
-  @ApiOperation({ summary: 'Get workspace projects' })
+  @ApiOperation({ summary: 'Get workspaces projects' })
   findAll(
     @CurrentUser() user: { userId: string; email: string },
     @Param('workspaceId') workspaceId: string,
