@@ -12,7 +12,7 @@ export class DashboardController {
 
   @Get()
   @ResponseMessage('Workspace dashboard retrieved successfully')
-  @ApiOperation({ summary: 'Get workspace dashboard analytics' })
+  @ApiOperation({ summary: 'Get workspaces dashboard analytics' })
   getWorkspaceDashboard(
     @CurrentUser() user: { userId: string; email: string },
     @Param('workspaceId') workspaceId: string,
