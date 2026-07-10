@@ -45,7 +45,7 @@ export class NotificationsGateway
     });
   }
 
-  @SubscribeMessage('workspace.join')
+  @SubscribeMessage('workspaces.join')
   handleJoinWorkspace(
     @ConnectedSocket() client: Socket,
     @MessageBody() payload: { workspaceId: string },
@@ -53,13 +53,13 @@ export class NotificationsGateway
     const room = this.getWorkspaceRoom(payload.workspaceId);
     client.join(room);
 
-    client.emit('workspace.joined', {
+    client.emit('workspaces.joined', {
       workspaceId: payload.workspaceId,
       room,
     });
   }
 
-  @SubscribeMessage('workspace.leave')
+  @SubscribeMessage('workspaces.leave')
   handleLeaveWorkspace(
     @ConnectedSocket() client: Socket,
     @MessageBody() payload: { workspaceId: string },
@@ -67,7 +67,7 @@ export class NotificationsGateway
     const room = this.getWorkspaceRoom(payload.workspaceId);
     client.leave(room);
 
-    client.emit('workspace.left', {
+    client.emit('workspaces.left', {
       workspaceId: payload.workspaceId,
       room,
     });
