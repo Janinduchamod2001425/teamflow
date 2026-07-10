@@ -1,9 +1,11 @@
 export default defineNuxtRouteMiddleware(async () => {
+  if (import.meta.server) return;
+
   const authStore = useAuthStore();
 
   authStore.initializeAuth();
 
-  if (!authStore.isAuthenticated) {
+  if (!authStore.token) {
     return navigateTo("/login");
   }
 
