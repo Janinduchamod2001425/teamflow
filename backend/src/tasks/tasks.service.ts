@@ -403,7 +403,7 @@ export class TasksService {
     });
 
     if (!member) {
-      throw new BadRequestException('Assignee must be a workspace member');
+      throw new BadRequestException('Assignee must be a workspaces member');
     }
 
     return member;
