@@ -13,6 +13,7 @@
     "@iconify/vue": "^5.0.1",
     "@pinia/nuxt": "^0.11.3",
     "@vueuse/core": "^14.3.0",
+    "@vueuse/motion": "^3.0.3",
     "axios": "^1.18.0",
     "dayjs": "^1.11.21",
     "lucide-vue-next": "^1.0.0",
