@@ -8,7 +8,7 @@
 
     <aside
       :class="[
-        'fixed left-0 top-0 z-50 h-screen border-r border-slate-200 bg-white px-4 py-6 transition-all duration-300',
+        'fixed left-0 top-0 z-50 h-screen border-r border-slate-200 bg-white px-3 py-6 transition-all duration-300',
         isCollapsed ? 'lg:w-20' : 'lg:w-64',
         'w-64',
         isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
@@ -45,7 +45,12 @@
         </button>
       </div>
 
-      <nav class="mt-8 space-y-2">
+      <!-- Workspace Switcher -->
+      <div v-if="!isCollapsed" class="mt-6">
+        <LayoutWorkspaceSwitcher />
+      </div>
+
+      <nav class="mt-6 space-y-2">
         <NuxtLink
           v-for="item in navItems"
           :key="item.to"
@@ -78,6 +83,7 @@ import {
   LayoutDashboard,
   PanelLeftClose,
   PanelLeftOpen,
+  UserCog,
   Users,
 } from "lucide-vue-next";
 
@@ -98,6 +104,7 @@ const navItems = [
   { label: "Workspaces", to: "/workspaces", icon: Users },
   { label: "Projects", to: "/projects", icon: FolderKanban },
   { label: "Tasks", to: "/tasks", icon: CheckSquare },
+  { label: "Members", to: "/members", icon: UserCog },
   { label: "Notifications", to: "/notifications", icon: Bell },
 ];
 </script>
