@@ -214,8 +214,14 @@ const password = ref("");
 const showPassword = ref(false);
 
 async function handleLogin() {
-  await authStore.login(email.value, password.value);
-  await navigateTo("/dashboard");
+  const toast = useToast();
+  try {
+    await authStore.login(email.value, password.value);
+    toast.success("Welcome back!");
+    await navigateTo("/dashboard");
+  } catch (err: any) {
+    toast.error(err?.response?.data?.message || "Invalid email or password");
+  }
 }
 </script>
 
