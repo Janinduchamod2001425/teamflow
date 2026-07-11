@@ -119,17 +119,21 @@ const editingWorkspace = ref<Workspace | null>(null);
 const deletingWorkspace = ref<Workspace | null>(null);
 const deleteLoading = ref(false);
 
+const toast = useToast();
+
 function confirmDelete(workspace: Workspace) {
   deletingWorkspace.value = workspace;
 }
 
 async function performDelete() {
   if (!deletingWorkspace.value) return;
-
   deleteLoading.value = true;
   try {
     await workspaceStore.deleteWorkspace(deletingWorkspace.value.id);
+    toast.success("Workspace deleted");
     deletingWorkspace.value = null;
+  } catch (err: any) {
+    toast.error(err?.response?.data?.message || "Failed to delete workspace");
   } finally {
     deleteLoading.value = false;
   }
@@ -141,14 +145,19 @@ onMounted(async () => {
 });
 
 async function saveWorkspace(data: CreateWorkspaceDto) {
-  if (editingWorkspace.value) {
-    await workspaceStore.updateWorkspace(editingWorkspace.value.id, data);
-  } else {
-    await workspaceStore.createWorkspace(data);
+  try {
+    if (editingWorkspace.value) {
+      await workspaceStore.updateWorkspace(editingWorkspace.value.id, data);
+      toast.success("Workspace updated successfully");
+    } else {
+      await workspaceStore.createWorkspace(data);
+      toast.success("Workspace created successfully");
+    }
+    editingWorkspace.value = null;
+    showModal.value = false;
+  } catch (err: any) {
+    toast.error(err?.response?.data?.message || "Something went wrong");
   }
-
-  editingWorkspace.value = null;
-  showModal.value = false;
 }
 
 function editWorkspace(workspace: Workspace) {
