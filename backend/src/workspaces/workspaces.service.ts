@@ -111,31 +111,6 @@ export class WorkspacesService {
     });
   }
 
-  // async checkWorkspaceRole(
-  //   userId: string,
-  //   workspaceId: string,
-  //   allowedRole: string[],
-  // ) {
-  //   const member = await this.prisma.workspaceMember.findFirst({
-  //     where: {
-  //       userId,
-  //       workspaceId,
-  //     },
-  //   });
-  //
-  //   if (!member) {
-  //     throw new NotFoundException('Workspace not found');
-  //   }
-  //
-  //   if (!allowedRole.includes(member.role)) {
-  //     throw new ForbiddenException(
-  //       'You do not have permission for this action',
-  //     );
-  //   }
-  //
-  //   return member;
-  // }
-
   async remove(userId: string, workspaceId: string) {
     await this.workspaceAccessService.requireAdmin(userId, workspaceId);
 
