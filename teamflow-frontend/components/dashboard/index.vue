@@ -1,20 +1,40 @@
 <template>
-  <div class="space-y-8">
-    <section>
-      <h1 class="text-3xl font-bold text-slate-900">Welcome back 👋</h1>
+  <section class="space-y-8">
+    <div>
+      <h1 class="text-3xl font-bold">
+        {{ workspace?.name }}
+      </h1>
 
-      <p class="mt-2 text-slate-500">
-        Here's what's happening across your team today.
+      <p class="text-slate-500">
+        {{ workspace?.description }}
       </p>
-    </section>
+    </div>
 
-    <DashboardStats />
-  </div>
+    <div class="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+      <StatCard :value="0" title="Projects" />
+
+      <StatCard :value="0" title="Tasks" />
+
+      <StatCard :value="0" title="Members" />
+
+      <StatCard :value="0" title="Completed" />
+    </div>
+  </section>
 </template>
 
 <script lang="ts" setup>
+import StatCard from "~/components/dashboard/StatCard.vue";
+
 definePageMeta({
   layout: "dashboard",
   middleware: "auth",
+});
+
+const workspaceStore = useWorkspaceStore();
+
+const workspace = computed(() => workspaceStore.selectedWorkspace);
+
+onMounted(() => {
+  workspaceStore.initializeWorkspace();
 });
 </script>
