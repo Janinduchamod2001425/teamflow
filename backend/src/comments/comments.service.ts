@@ -64,6 +64,7 @@ export class CommentsService {
         title: 'New Comment',
         message: `A new comment was added to task "${task.title}"`,
         type: 'COMMENT_CREATED',
+        metadata: { taskId, projectId, workspaceId },
       });
     }
 
