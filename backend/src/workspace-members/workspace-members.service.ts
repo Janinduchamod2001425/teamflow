@@ -73,6 +73,7 @@ export class WorkspaceMembersService {
       title: 'Workspace Invitation',
       message: `You have been invited to workspace "${member.workspace.name}" as ${member.role}`,
       type: 'WORKSPACE_INVITE',
+      metadata: { invitationId: member.id, workspaceId },
     });
 
     return member;
@@ -152,17 +153,38 @@ export class WorkspaceMembersService {
         id: memberId,
         workspaceId,
       },
+      include: {
+        workspace: true,
+      },
     });
 
     if (!member) {
       throw new NotFoundException('Workspace member not found');
     }
 
+    const wasPending = member.status === MembershipStatus.PENDING;
+
     await this.prisma.workspaceMember.delete({
       where: {
         id: memberId,
       },
     });
+
+    if (wasPending) {
+      await this.notificationsService.createForUser({
+        userId: member.userId,
+        title: 'Invitation Cancelled',
+        message: `Your invitation to join "${member.workspace.name}" was cancelled by an admin.`,
+        type: 'WORKSPACE_INVITE_CANCELLED',
+      });
+    } else {
+      await this.notificationsService.createForUser({
+        userId: member.userId,
+        title: 'Removed from Workspace',
+        message: `You have been removed from workspace "${member.workspace.name}".`,
+        type: 'WORKSPACE_MEMBER_REMOVED',
+      });
+    }
 
     return null;
   }
