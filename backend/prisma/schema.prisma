@@ -46,9 +46,16 @@ model Workspace {
   activityLogs ActivityLog[]
 }
 
+enum MembershipStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+}
+
 model WorkspaceMember {
-  id          String @id @default(cuid())
-  role        Role   @default(MEMBER)
+  id          String   @id @default(cuid())
+  role        Role     @default(MEMBER)
+  status      MembershipStatus @default(ACCEPTED)
   createdAt   DateTime @default(now())
 
   userId      String
