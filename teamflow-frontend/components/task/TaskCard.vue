@@ -30,6 +30,7 @@
           </svg>
         </button>
         <button
+          v-if="canDelete"
           class="rounded p-1 text-slate-400 hover:bg-red-50 hover:text-red-600"
           @click="$emit('delete', task)"
         >
@@ -128,7 +129,10 @@
 import { computed } from "vue";
 import type { Task, TaskStatus } from "~/types/task";
 
-const props = defineProps<{ task: Task }>();
+const props = defineProps<{
+  task: Task;
+  canDelete?: boolean;
+}>();
 
 defineEmits<{
   edit: [task: Task];
