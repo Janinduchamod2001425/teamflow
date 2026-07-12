@@ -83,6 +83,7 @@
       <KanbanBoard
         v-if="activeProject"
         :board="taskStore.board"
+        :can-delete="workspaceStore.isManagerOrAbove"
         @delete="confirmDelete"
         @edit="editTask"
         @move="handleMove"
@@ -335,10 +336,24 @@ onMounted(async () => {
 
   if (selectedProjectId.value) {
     await taskStore.fetchBoard(workspace.value.id, selectedProjectId.value);
+    openTaskFromQuery();
   } else {
     await runSearch();
   }
 });
+
+function openTaskFromQuery() {
+  const taskId = route.query.taskId as string | undefined;
+  if (!taskId) return;
+
+  const allTasks = Object.values(taskStore.board).flat();
+  const task = allTasks.find((t) => t.id === taskId);
+
+  if (task) {
+    editingTask.value = task;
+    showModal.value = true;
+  }
+}
 
 watch(
   () => route.query.projectId,
