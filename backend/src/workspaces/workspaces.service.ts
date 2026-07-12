@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateWorkspaceDto } from './dto/create-workspace.dto';
-import { Role } from '@prisma/client';
+import { MembershipStatus, Role } from '@prisma/client';
 import { UpdateWorkspaceDto } from './dto/update-workspace.dto';
 import { WorkspaceAccessService } from '../workspace-access/workspace-access.service';
 
@@ -40,6 +40,7 @@ export class WorkspacesService {
         members: {
           some: {
             userId,
+            status: MembershipStatus.ACCEPTED,
           },
         },
       },
