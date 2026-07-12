@@ -66,8 +66,20 @@
         >
           <component :is="item.icon" class="h-5 w-5 shrink-0" />
 
-          <span v-if="!isCollapsed">
+          <span
+            v-if="!isCollapsed"
+            class="flex flex-1 items-center justify-between"
+          >
             {{ item.label }}
+            <span
+              v-if="
+                item.to === '/invitations' &&
+                invitationStore.invitations.length > 0
+              "
+              class="rounded-full bg-red-500 px-1.5 py-0.5 text-[10px] font-bold text-white"
+            >
+              {{ invitationStore.invitations.length }}
+            </span>
           </span>
         </NuxtLink>
       </nav>
@@ -81,11 +93,18 @@ import {
   CheckSquare,
   FolderKanban,
   LayoutDashboard,
+  Mail,
   PanelLeftClose,
   PanelLeftOpen,
   UserCog,
   Users,
 } from "lucide-vue-next";
+
+const invitationStore = useInvitationStore();
+
+onMounted(() => {
+  invitationStore.fetchMine();
+});
 
 defineProps<{
   isOpen: boolean;
@@ -105,6 +124,7 @@ const navItems = [
   { label: "Projects", to: "/projects", icon: FolderKanban },
   { label: "Tasks", to: "/tasks", icon: CheckSquare },
   { label: "Members", to: "/members", icon: UserCog },
+  { label: "Invitations", to: "/invitations", icon: Mail },
   { label: "Notifications", to: "/notifications", icon: Bell },
 ];
 </script>
