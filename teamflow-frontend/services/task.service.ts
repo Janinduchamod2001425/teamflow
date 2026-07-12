@@ -19,6 +19,10 @@ export const TaskService = {
     });
   },
 
+  search(workspaceId: string, params: TaskSearchParams) {
+    return api.get(`/workspaces/${workspaceId}/tasks/search`, { params });
+  },
+
   findOne(workspaceId: string, taskId: string) {
     return api.get(`/workspaces/${workspaceId}/tasks/${taskId}`);
   },
@@ -39,9 +43,5 @@ export const TaskService = {
 
   remove(workspaceId: string, taskId: string) {
     return api.delete(`/workspaces/${workspaceId}/tasks/${taskId}`);
-  },
-
-  search(workspaceId: string, params: TaskSearchParams) {
-    return api.get(`/workspaces/${workspaceId}/tasks/search`, { params });
   },
 };
