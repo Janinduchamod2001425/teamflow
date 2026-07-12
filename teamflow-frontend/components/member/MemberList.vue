@@ -16,6 +16,7 @@
         <tr
           v-for="member in members"
           :key="member.id"
+          :class="member.status === 'PENDING' ? 'opacity-70' : ''"
           class="border-b border-slate-100 last:border-0 hover:bg-slate-50"
         >
           <td class="px-4 py-3">
@@ -32,13 +33,23 @@
                   class="text-xs font-normal text-slate-400"
                   >(you)</span
                 >
+                <span
+                  v-if="member.status === 'PENDING'"
+                  class="ml-1.5 rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-medium text-amber-700"
+                >
+                  Pending
+                </span>
               </span>
             </div>
           </td>
           <td class="px-4 py-3 text-slate-500">{{ member.user.email }}</td>
           <td class="px-4 py-3">
             <select
-              v-if="canManage && member.user.id !== currentUserId"
+              v-if="
+                canManage &&
+                member.user.id !== currentUserId &&
+                member.status === 'ACCEPTED'
+              "
               :value="member.role"
               class="rounded-lg border border-slate-200 px-2 py-1 text-xs font-medium"
               @change="
@@ -62,7 +73,13 @@
             </span>
           </td>
           <td class="px-4 py-3 text-slate-500">
-            {{ formatDate(member.createdAt) }}
+            <span
+              v-if="member.status === 'PENDING'"
+              class="italic text-slate-400"
+            >
+              Invitation sent
+            </span>
+            <span v-else>{{ formatDate(member.createdAt) }}</span>
           </td>
           <td class="px-4 py-3 text-right">
             <button
@@ -70,7 +87,7 @@
               class="text-xs text-red-500 hover:text-red-700"
               @click="$emit('remove', member)"
             >
-              Remove
+              {{ member.status === "PENDING" ? "Cancel Invite" : "Remove" }}
             </button>
           </td>
         </tr>
