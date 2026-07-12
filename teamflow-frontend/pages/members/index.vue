@@ -84,12 +84,23 @@
             <div
               class="w-full max-w-sm rounded-2xl border border-white/20 bg-white p-6 shadow-2xl"
             >
-              <h2 class="text-lg font-bold text-slate-900">Remove member?</h2>
+              <h2 class="text-lg font-bold text-slate-900">
+                {{ isPending ? "Cancel invitation?" : "Remove member?" }}
+              </h2>
               <p class="mt-2 text-sm text-slate-500">
-                <span class="font-medium text-slate-700">{{
-                  removingMember?.user.name
-                }}</span>
-                will lose access to this workspace immediately.
+                <template v-if="isPending">
+                  The invitation sent to
+                  <span class="font-medium text-slate-700">{{
+                    removingMember?.user.email
+                  }}</span>
+                  will be withdrawn, and they'll be notified it was cancelled.
+                </template>
+                <template v-else>
+                  <span class="font-medium text-slate-700">{{
+                    removingMember?.user.name
+                  }}</span>
+                  will lose access to this workspace immediately.
+                </template>
               </p>
               <div class="mt-6 flex justify-end gap-3">
                 <button
@@ -103,7 +114,13 @@
                   class="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-60"
                   @click="performRemove"
                 >
-                  {{ removeLoading ? "Removing..." : "Remove" }}
+                  {{
+                    removeLoading
+                      ? "Working..."
+                      : isPending
+                        ? "Cancel Invite"
+                        : "Remove"
+                  }}
                 </button>
               </div>
             </div>
@@ -141,6 +158,8 @@ const showInviteModal = ref(false);
 const inviteLoading = ref(false);
 const removingMember = ref<WorkspaceMember | null>(null);
 const removeLoading = ref(false);
+
+const isPending = computed(() => removingMember.value?.status === "PENDING");
 
 onMounted(async () => {
   workspaceStore.initializeWorkspace();
@@ -196,10 +215,12 @@ function confirmRemove(member: WorkspaceMember) {
 async function performRemove() {
   if (!workspace.value || !removingMember.value) return;
 
+  const wasPending = removingMember.value.status === "PENDING";
+
   removeLoading.value = true;
   try {
     await memberStore.removeMember(workspace.value.id, removingMember.value.id);
-    toast.success("Member removed");
+    toast.success(wasPending ? "Invitation cancelled" : "Member removed");
     removingMember.value = null;
   } catch (err: any) {
     toast.error(err?.response?.data?.message || "Failed to remove member");
