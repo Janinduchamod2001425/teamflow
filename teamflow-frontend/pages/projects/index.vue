@@ -35,6 +35,7 @@
         </div>
 
         <button
+          v-if="workspaceStore.isManagerOrAbove"
           class="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-200 transition-all hover:shadow-xl hover:shadow-indigo-300"
           @click="
             editingProject = null;
@@ -66,6 +67,7 @@
       </p>
 
       <ProjectList
+        :can-manage="workspaceStore.isManagerOrAbove"
         :projects="projectStore.projects"
         @delete="confirmDelete"
         @edit="editProject"
