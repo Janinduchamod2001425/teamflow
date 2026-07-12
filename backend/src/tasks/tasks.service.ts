@@ -72,6 +72,7 @@ export class TasksService {
         title: 'New Task Assigned',
         message: `You have been assigned to task "${task.title}"`,
         type: 'TASK_ASSIGNED',
+        metadata: { taskId: task.id, projectId, workspaceId },
       });
     }
 
@@ -255,6 +256,7 @@ export class TasksService {
         title: 'Task Updated',
         message: `Task "${task.title}" was updated`,
         type: 'TASK_UPDATED',
+        metadata: { taskId: task.id, projectId, workspaceId },
       });
     }
 
@@ -305,6 +307,7 @@ export class TasksService {
         title: 'Task Status Updated',
         message: `Task "${task.title}" moved to ${task.status}`,
         type: 'TASK_STATUS_UPDATED',
+        metadata: { taskId: task.id, projectId, workspaceId },
       });
     }
 
