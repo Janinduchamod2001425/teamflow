@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import { WorkspaceService } from "~/services/workspace.service";
 
 import type {
@@ -68,6 +68,20 @@ export const useWorkspaceStore = defineStore("workspace", () => {
     await fetchWorkspaces();
   }
 
+  const myRole = computed(() => {
+    const authStore = useAuthStore();
+    const uid = authStore.user?.id;
+    if (!uid || !selectedWorkspace.value?.members) return null;
+
+    const me = selectedWorkspace.value.members.find((m) => m.user.id === uid);
+    return me?.role ?? null;
+  });
+
+  const isAdmin = computed(() => myRole.value === "ADMIN");
+  const isManagerOrAbove = computed(
+    () => myRole.value === "ADMIN" || myRole.value === "MANAGER",
+  );
+
   return {
     workspaces,
     selectedWorkspace,
@@ -80,5 +94,9 @@ export const useWorkspaceStore = defineStore("workspace", () => {
     createWorkspace,
     updateWorkspace,
     deleteWorkspace,
+
+    myRole,
+    isAdmin,
+    isManagerOrAbove,
   };
 });
