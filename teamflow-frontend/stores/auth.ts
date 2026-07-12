@@ -1,6 +1,7 @@
 import { defineStore } from "pinia";
 import { computed, ref } from "vue";
 import { AuthService } from "~/services/auth.service";
+import { useNotificationStore } from "~/stores/notification";
 
 interface User {
   id: string;
@@ -27,10 +28,29 @@ export const useAuthStore = defineStore("auth", () => {
 
       localStorage.setItem("teamflow_token", token.value!);
 
+      connectSocket();
+
       return response.data;
     } finally {
       loading.value = false;
     }
+  }
+
+  function connectSocket() {
+    if (!import.meta.client || !user.value) return;
+
+    const { $socket } = useNuxtApp();
+    const socket = $socket as any;
+
+    if (!socket.connected) {
+      socket.connect();
+    }
+
+    socket.emit("user.join", { userId: user.value.id });
+
+    const notificationStore = useNotificationStore();
+    notificationStore.listenForLiveUpdates();
+    notificationStore.fetchUnreadCount();
   }
 
   async function fetchMe() {
@@ -39,10 +59,17 @@ export const useAuthStore = defineStore("auth", () => {
     const response = await AuthService.me();
     user.value = response.data.data;
 
+    connectSocket();
+
     return user.value;
   }
 
   function logout() {
+    if (import.meta.client) {
+      const { $socket } = useNuxtApp();
+      ($socket as any).disconnect();
+    }
+
     user.value = null;
     token.value = null;
     localStorage.removeItem("teamflow_token");
@@ -68,5 +95,6 @@ export const useAuthStore = defineStore("auth", () => {
     fetchMe,
     logout,
     initializeAuth,
+    connectSocket,
   };
 });
