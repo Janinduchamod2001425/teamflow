@@ -18,6 +18,7 @@ import { NotificationsModule } from './notifications/notifications.module';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { AttachmentsModule } from './attachments/attachments.module';
 import { CacheModule } from './cache/cache.module';
+import { InvitationsModule } from './invitations/invitations.module';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { CacheModule } from './cache/cache.module';
     DashboardModule,
     AttachmentsModule,
     CacheModule,
+    InvitationsModule,
   ],
   controllers: [],
   providers: [
