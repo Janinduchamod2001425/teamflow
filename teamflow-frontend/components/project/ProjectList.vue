@@ -3,6 +3,7 @@
     <ProjectCard
       v-for="(project, i) in projects"
       :key="project.id"
+      :can-manage="canManage"
       :index="i"
       :project="project"
       @delete="$emit('delete', $event)"
@@ -18,6 +19,7 @@ import type { Project } from "~/types/project";
 
 defineProps<{
   projects: Project[];
+  canManage?: boolean;
 }>();
 
 defineEmits<{
