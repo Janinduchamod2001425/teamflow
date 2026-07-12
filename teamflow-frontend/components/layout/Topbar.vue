@@ -53,13 +53,16 @@
             stroke-width="1.5"
           />
         </svg>
-        <span class="absolute -right-0.5 -top-0.5 flex h-2.5 w-2.5">
-          <span
-            class="absolute inline-flex h-full w-full animate-ping rounded-full bg-indigo-400 opacity-75"
-          ></span>
-          <span
-            class="relative inline-flex h-2.5 w-2.5 rounded-full bg-indigo-500"
-          ></span>
+
+        <span
+          v-if="notificationStore.unreadCount > 0"
+          class="absolute -right-1 -top-1 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white"
+        >
+          {{
+            notificationStore.unreadCount > 9
+              ? "9+"
+              : notificationStore.unreadCount
+          }}
         </span>
       </NuxtLink>
 
@@ -101,6 +104,7 @@ defineEmits<{
 
 const route = useRoute();
 const authStore = useAuthStore();
+const notificationStore = useNotificationStore();
 
 const pageTitle = computed(() => {
   if (route.path.startsWith("/workspaces")) return "Workspaces";
