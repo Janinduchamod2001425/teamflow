@@ -173,6 +173,7 @@ model Notification {
   title     String
   message   String
   type      String
+  metadata  Json?
   isRead    Boolean  @default(false)
   createdAt DateTime @default(now())
 
