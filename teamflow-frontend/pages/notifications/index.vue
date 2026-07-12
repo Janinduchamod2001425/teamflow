@@ -25,8 +25,12 @@
       <div
         v-for="notification in notificationStore.notifications"
         :key="notification.id"
-        :class="notification.isRead ? 'bg-white' : 'bg-indigo-50/40'"
+        :class="[
+          notification.isRead ? 'bg-white' : 'bg-indigo-50/40',
+          isClickable(notification) ? 'cursor-pointer hover:bg-slate-50' : '',
+        ]"
         class="flex items-start gap-3 border-b border-slate-100 px-5 py-4 last:border-0 transition"
+        @click="handleClick(notification)"
       >
         <div
           :class="notification.isRead ? 'bg-transparent' : 'bg-indigo-500'"
@@ -45,10 +49,25 @@
           </p>
         </div>
 
+        <svg
+          v-if="isClickable(notification)"
+          class="mt-1 h-4 w-4 shrink-0 text-slate-300"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            d="M9 5l7 7-7 7"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+          />
+        </svg>
+
         <button
-          v-if="!notification.isRead"
+          v-else-if="!notification.isRead"
           class="shrink-0 text-xs font-medium text-indigo-600 hover:text-indigo-700"
-          @click="notificationStore.markAsRead(notification.id)"
+          @click.stop="notificationStore.markAsRead(notification.id)"
         >
           Mark read
         </button>
@@ -68,6 +87,8 @@
 </template>
 
 <script lang="ts" setup>
+import type { Notification } from "~/types/notification";
+
 definePageMeta({
   layout: "dashboard",
   middleware: "auth",
@@ -75,6 +96,55 @@ definePageMeta({
 
 const notificationStore = useNotificationStore();
 const toast = useToast();
+const router = useRouter();
+
+// Map notification.type -> destination route.
+// Extend this map as new notification types get a dedicated page.
+const routeMap: Record<string, string> = {
+  WORKSPACE_INVITE: "/invitations",
+  TASK_ASSIGNED: "/tasks",
+  TASK_UPDATED: "/tasks",
+  TASK_STATUS_UPDATED: "/tasks",
+  COMMENT_CREATED: "/tasks",
+};
+
+function isClickable(notification: Notification) {
+  return [
+    "WORKSPACE_INVITE",
+    "TASK_ASSIGNED",
+    "TASK_UPDATED",
+    "TASK_STATUS_UPDATED",
+    "COMMENT_CREATED",
+  ].includes(notification.type);
+}
+
+async function handleClick(notification: Notification) {
+  if (!notification.isRead) {
+    await notificationStore.markAsRead(notification.id);
+  }
+
+  const meta = notification.metadata;
+
+  if (notification.type === "WORKSPACE_INVITE") {
+    router.push("/invitations");
+    return;
+  }
+
+  if (meta?.projectId && meta?.taskId) {
+    router.push({
+      path: "/tasks",
+      query: { projectId: meta.projectId, taskId: meta.taskId },
+    });
+    return;
+  }
+
+  if (meta?.projectId) {
+    router.push({ path: "/tasks", query: { projectId: meta.projectId } });
+    return;
+  }
+
+  router.push("/tasks");
+}
 
 onMounted(async () => {
   await notificationStore.fetchAll();
