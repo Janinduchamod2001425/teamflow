@@ -18,6 +18,7 @@
         <TaskCard
           v-for="task in board[col.status]"
           :key="task.id"
+          :can-delete="canDelete"
           :task="task"
           @delete="$emit('delete', $event)"
           @edit="$emit('edit', $event)"
@@ -39,7 +40,10 @@
 import TaskCard from "./TaskCard.vue";
 import type { Task, TaskBoard, TaskStatus } from "~/types/task";
 
-defineProps<{ board: TaskBoard }>();
+defineProps<{
+  board: TaskBoard;
+  canDelete?: boolean;
+}>();
 
 defineEmits<{
   edit: [task: Task];
