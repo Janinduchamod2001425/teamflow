@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { Role } from '@prisma/client';
+import { MembershipStatus, Role } from '@prisma/client';
 
 @Injectable()
 export class WorkspaceAccessService {
@@ -15,6 +15,7 @@ export class WorkspaceAccessService {
       where: {
         userId,
         workspaceId,
+        status: MembershipStatus.ACCEPTED,
       },
     });
 
