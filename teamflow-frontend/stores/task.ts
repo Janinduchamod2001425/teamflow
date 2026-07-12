@@ -26,6 +26,16 @@ export const useTaskStore = defineStore("task", () => {
   const searchMeta = ref({ total: 0, page: 1, limit: 10, totalPages: 0 });
   const searchLoading = ref(false);
 
+  async function fetchBoard(workspaceId: string, projectId: string) {
+    loading.value = true;
+    try {
+      const response = await TaskService.getBoard(workspaceId, projectId);
+      board.value = response.data.data;
+    } finally {
+      loading.value = false;
+    }
+  }
+
   async function fetchSearch(workspaceId: string, params: TaskSearchParams) {
     searchLoading.value = true;
     try {
@@ -35,16 +45,6 @@ export const useTaskStore = defineStore("task", () => {
       searchMeta.value = result.meta;
     } finally {
       searchLoading.value = false;
-    }
-  }
-
-  async function fetchBoard(workspaceId: string, projectId: string) {
-    loading.value = true;
-    try {
-      const response = await TaskService.getBoard(workspaceId, projectId);
-      board.value = response.data.data;
-    } finally {
-      loading.value = false;
     }
   }
 
@@ -108,12 +108,18 @@ export const useTaskStore = defineStore("task", () => {
 
   function reset() {
     board.value = emptyBoard();
+    searchResults.value = [];
+    searchMeta.value = { total: 0, page: 1, limit: 10, totalPages: 0 };
   }
 
   return {
     board,
     loading,
+    searchResults,
+    searchMeta,
+    searchLoading,
     fetchBoard,
+    fetchSearch,
     createTask,
     updateTask,
     moveTask,
