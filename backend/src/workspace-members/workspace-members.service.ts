@@ -7,7 +7,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { UsersService } from '../users/users.service';
 import { InviteMemberDto } from './dto/invite-member.dto';
 import { WorkspaceAccessService } from '../workspace-access/workspace-access.service';
-import { Role } from '@prisma/client';
+import { MembershipStatus, Role } from '@prisma/client';
 import { NotificationsService } from '../notifications/notifications.service';
 
 @Injectable()
@@ -52,6 +52,7 @@ export class WorkspaceMembersService {
         userId: userToInvite.id,
         workspaceId,
         role: inviteMemberDto.role,
+        status: MembershipStatus.PENDING,
       },
 
       include: {
