@@ -168,6 +168,10 @@ export class CommentsService {
       );
     }
 
+    await this.prisma.comment.delete({
+      where: { id: commentId },
+    });
+
     await this.activitiesService.createActivity({
       workspaceId,
       userId,
