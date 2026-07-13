@@ -159,12 +159,18 @@ const inviteLoading = ref(false);
 const removingMember = ref<WorkspaceMember | null>(null);
 const removeLoading = ref(false);
 
+const route = useRoute();
+
 const isPending = computed(() => removingMember.value?.status === "PENDING");
 
 onMounted(async () => {
   workspaceStore.initializeWorkspace();
   if (workspace.value) {
     await memberStore.fetchMembers(workspace.value.id);
+  }
+
+  if (route.query.action === "invite" && canManage.value) {
+    showInviteModal.value = true;
   }
 });
 
