@@ -148,10 +148,15 @@ const editingProject = ref<Project | null>(null);
 const deletingProject = ref<Project | null>(null);
 const deleteLoading = ref(false);
 
+const route = useRoute();
+
 onMounted(async () => {
   workspaceStore.initializeWorkspace();
-  if (workspace.value) {
-    await projectStore.fetchProjects(workspace.value.id);
+  await workspaceStore.fetchWorkspaces(); // or your existing init logic — keep whatever's already there
+
+  if (route.query.action === "new" && workspaceStore.isManagerOrAbove) {
+    editingProject.value = null;
+    showModal.value = true;
   }
 });
 
