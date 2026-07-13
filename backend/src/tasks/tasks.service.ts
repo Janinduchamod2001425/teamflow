@@ -431,6 +431,11 @@ export class TasksService {
         },
       },
       project: true,
+      _count: {
+        select: {
+          comments: true,
+        },
+      },
     };
   }
 }
