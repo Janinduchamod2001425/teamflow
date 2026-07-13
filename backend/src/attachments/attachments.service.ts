@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { WorkspaceAccessService } from '../workspace-access/workspace-access.service';
 
@@ -47,7 +51,10 @@ export class AttachmentsService {
     taskId: string,
     attachmentId: string,
   ) {
-    await this.workspaceAccessService.requireMember(userId, workspaceId);
+    const member = await this.workspaceAccessService.requireMember(
+      userId,
+      workspaceId,
+    );
     await this.ensureTaskBelongsToWorkspace(taskId, workspaceId);
 
     const attachment = await this.prisma.attachment.findFirst({
@@ -59,6 +66,17 @@ export class AttachmentsService {
 
     if (!attachment) {
       throw new NotFoundException('Attachment not found');
+    }
+
+    const canDelete =
+      attachment.uploadedBy === userId ||
+      member.role === 'ADMIN' ||
+      member.role === 'MANAGER';
+
+    if (!canDelete) {
+      throw new ForbiddenException(
+        'You do not have permission to delete this attachment',
+      );
     }
 
     await this.prisma.attachment.delete({
