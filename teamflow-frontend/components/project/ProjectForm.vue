@@ -30,7 +30,7 @@
       <div class="flex items-center gap-3">
         <input
           v-model="form.color"
-          class="h-11 w-14 cursor-pointer rounded-4xl border border-slate-200 bg-white/50"
+          class="color-swatch h-12 w-12 cursor-pointer rounded-full border-2 border-slate-200 p-0 transition hover:border-slate-300"
           type="color"
         />
         <div class="flex flex-wrap gap-2">
@@ -38,7 +38,7 @@
             v-for="preset in colorPresets"
             :key="preset"
             :class="
-              form.color === preset ? 'border-slate-900' : 'border-transparent'
+              form.color === preset ? 'border-slate-500' : 'border-transparent'
             "
             :style="{ backgroundColor: preset }"
             class="h-7 w-7 rounded-full border-2 transition"
@@ -56,6 +56,25 @@
     </button>
   </form>
 </template>
+
+<style scoped>
+.color-swatch {
+  appearance: none;
+  -webkit-appearance: none;
+}
+.color-swatch::-webkit-color-swatch-wrapper {
+  padding: 0;
+  border-radius: 9999px;
+}
+.color-swatch::-webkit-color-swatch {
+  border: none;
+  border-radius: 9999px;
+}
+.color-swatch::-moz-color-swatch {
+  border: none;
+  border-radius: 9999px;
+}
+</style>
 
 <script lang="ts" setup>
 import { reactive, watch } from "vue";
