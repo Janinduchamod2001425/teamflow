@@ -22,6 +22,8 @@ export interface Task {
   createdBy: TaskUser;
   createdAt: string;
   updatedAt: string;
+  _count?: { comments: number };
+  project?: { id: string; name: string; color: string | null };
 }
 
 export interface CreateTaskDto {
