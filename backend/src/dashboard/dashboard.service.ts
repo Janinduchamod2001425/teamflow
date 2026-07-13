@@ -90,7 +90,7 @@ export class DashboardService {
 
       this.prisma.activityLog.findMany({
         where: { workspaceId },
-        take: 5,
+        take: 10,
         orderBy: { createdAt: 'desc' },
         include: {
           user: {
