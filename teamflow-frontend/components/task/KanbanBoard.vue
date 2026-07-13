@@ -21,8 +21,8 @@
           :can-delete="canDelete"
           :task="task"
           @delete="$emit('delete', $event)"
-          @edit="$emit('edit', $event)"
           @move="(t, s) => $emit('move', t, s)"
+          @open="$emit('open', $event)"
         />
 
         <p
@@ -46,7 +46,7 @@ defineProps<{
 }>();
 
 defineEmits<{
-  edit: [task: Task];
+  open: [task: Task];
   delete: [task: Task];
   move: [task: Task, status: TaskStatus];
 }>();
