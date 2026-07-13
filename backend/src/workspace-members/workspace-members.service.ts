@@ -121,6 +121,10 @@ export class WorkspaceMembersService {
       throw new NotFoundException('Workspace member not found');
     }
 
+    if (member.role === Role.ADMIN && role !== Role.ADMIN) {
+      await this.ensureNotLastAdmin(workspaceId, memberId);
+    }
+
     return this.prisma.workspaceMember.update({
       where: {
         id: memberId,
@@ -164,6 +168,10 @@ export class WorkspaceMembersService {
 
     const wasPending = member.status === MembershipStatus.PENDING;
 
+    if (member.role === Role.ADMIN && !wasPending) {
+      await this.ensureNotLastAdmin(workspaceId, memberId);
+    }
+
     await this.prisma.workspaceMember.delete({
       where: {
         id: memberId,
@@ -177,7 +185,7 @@ export class WorkspaceMembersService {
         message: `Your invitation to join "${member.workspace.name}" was cancelled by an admin.`,
         type: 'WORKSPACE_INVITE_CANCELLED',
       });
-    } else {
+    } else if (currentUserId !== member.userId) {
       await this.notificationsService.createForUser({
         userId: member.userId,
         title: 'Removed from Workspace',
@@ -187,5 +195,25 @@ export class WorkspaceMembersService {
     }
 
     return null;
+  }
+
+  private async ensureNotLastAdmin(
+    workspaceId: string,
+    excludingMemberId: string,
+  ) {
+    const adminCount = await this.prisma.workspaceMember.count({
+      where: {
+        workspaceId,
+        role: Role.ADMIN,
+        status: MembershipStatus.ACCEPTED,
+        id: { not: excludingMemberId },
+      },
+    });
+
+    if (adminCount === 0) {
+      throw new ConflictException(
+        'Cannot remove the last admin. Promote another member to admin first.',
+      );
+    }
   }
 }
