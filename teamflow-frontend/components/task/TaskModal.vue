@@ -7,7 +7,7 @@
         @click.self="$emit('close')"
       >
         <div
-          class="w-full max-w-lg rounded-3xl border border-white/20 bg-white p-8 shadow-2xl shadow-black/5 backdrop-blur-xl"
+          class="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-3xl border border-white/20 bg-white p-8 shadow-2xl shadow-black/5 backdrop-blur-xl"
         >
           <div class="mb-6 flex items-center justify-between">
             <h2 class="text-2xl font-bold text-slate-900">
@@ -38,6 +38,19 @@
             :task="task"
             @submit="$emit('submit', $event)"
           />
+
+          <CommentSection
+            v-if="task && workspaceId && projectId"
+            :can-manage="canManage"
+            :current-user-id="currentUserId"
+            :project-id="projectId"
+            :task-id="task.id"
+            :workspace-id="workspaceId"
+            class="mt-8 border-t border-slate-100 pt-6"
+            @comment-count-change="
+              (taskId, delta) => $emit('comment-count-change', taskId, delta)
+            "
+          />
         </div>
       </div>
     </Transition>
@@ -47,14 +60,19 @@
 <script lang="ts" setup>
 import type { Task } from "~/types/task";
 import TaskForm from "./TaskForm.vue";
+import CommentSection from "./CommentSection.vue";
 
 defineProps<{
   show: boolean;
   task?: Task | null;
   members: Array<{ user: { id: string; name: string } }>;
+  workspaceId?: string;
+  projectId?: string;
+  currentUserId?: string;
+  canManage?: boolean;
 }>();
 
-defineEmits(["close", "submit"]);
+defineEmits(["close", "submit", "comment-count-change"]);
 </script>
 
 <style scoped>
