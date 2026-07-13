@@ -85,8 +85,8 @@
         :board="taskStore.board"
         :can-delete="workspaceStore.isManagerOrAbove"
         @delete="confirmDelete"
-        @edit="editTask"
         @move="handleMove"
+        @open="editTask"
       />
 
       <!-- List mode: shown when browsing all tasks across the workspace -->
@@ -144,6 +144,7 @@
                 <th class="px-4 py-3">Priority</th>
                 <th class="px-4 py-3">Assignee</th>
                 <th class="px-4 py-3">Due</th>
+                <th class="px-4 py-3">Comments</th>
                 <th class="px-4 py-3"></th>
               </tr>
             </thead>
@@ -151,7 +152,8 @@
               <tr
                 v-for="task in taskStore.searchResults"
                 :key="task.id"
-                class="border-b border-slate-100 last:border-0 hover:bg-slate-50"
+                class="cursor-pointer border-b border-slate-100 last:border-0 hover:bg-slate-50"
+                @click="editTask(task)"
               >
                 <td class="px-4 py-3 font-medium text-slate-800">
                   {{ task.title }}
@@ -159,7 +161,7 @@
                 <td class="px-4 py-3">
                   <button
                     class="text-indigo-600 hover:underline"
-                    @click="openProjectFilter(task.projectId)"
+                    @click.stop="openProjectFilter(task.projectId)"
                   >
                     {{ projectName(task.projectId) }}
                   </button>
@@ -186,13 +188,11 @@
                 <td class="px-4 py-3 text-slate-500">
                   {{ task.dueDate ? formatDate(task.dueDate) : "—" }}
                 </td>
+                <td class="px-4 py-3 text-slate-400">
+                  {{ task._count?.comments || 0 }}
+                </td>
                 <td class="px-4 py-3 text-right">
-                  <button
-                    class="text-xs text-slate-400 hover:text-indigo-600"
-                    @click="editTask(task)"
-                  >
-                    Edit
-                  </button>
+                  <span class="text-xs text-slate-400">Open →</span>
                 </td>
               </tr>
 
@@ -202,7 +202,7 @@
                   taskStore.searchResults.length === 0
                 "
               >
-                <td class="px-4 py-10 text-center text-slate-400" colspan="7">
+                <td class="px-4 py-10 text-center text-slate-400" colspan="8">
                   No tasks found.
                 </td>
               </tr>
@@ -236,14 +236,16 @@
       </template>
 
       <TaskModal
+        :can-manage="workspaceStore.isManagerOrAbove"
+        :current-user-id="authStore.user?.id"
         :members="workspace.members || []"
+        :project-id="editingTask?.projectId"
         :show="showModal"
         :task="editingTask"
-        @close="
-          showModal = false;
-          editingTask = null;
-        "
+        :workspace-id="workspace.id"
+        @close="closeTaskModal"
         @submit="saveTask"
+        @comment-count-change="handleCommentCountChange"
       />
 
       <Teleport to="body">
@@ -319,6 +321,8 @@ const showModal = ref(false);
 const editingTask = ref<Task | null>(null);
 const deletingTask = ref<Task | null>(null);
 const deleteLoading = ref(false);
+
+const authStore = useAuthStore();
 
 const filters = reactive({
   keyword: "",
@@ -499,4 +503,24 @@ const priorityStyles: Record<string, string> = {
   HIGH: "bg-amber-100 text-amber-700",
   URGENT: "bg-red-100 text-red-700",
 };
+
+const commentStore = useCommentStore();
+
+function closeTaskModal() {
+  showModal.value = false;
+  editingTask.value = null;
+  commentStore.reset();
+}
+
+function handleCommentCountChange(taskId: string, delta: number) {
+  const allBoardTasks = Object.values(taskStore.board).flat();
+  const target = [...allBoardTasks, ...taskStore.searchResults].find(
+    (t) => t.id === taskId,
+  );
+
+  if (target) {
+    const current = target._count?.comments ?? 0;
+    target._count = { comments: Math.max(0, current + delta) };
+  }
+}
 </script>
