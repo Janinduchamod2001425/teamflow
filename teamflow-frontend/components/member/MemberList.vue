@@ -84,9 +84,10 @@
           <td class="px-4 py-3 text-right">
             <button
               v-if="canManage && member.user.id !== currentUserId"
-              class="text-xs text-red-500 hover:text-red-700"
+              class="inline-flex items-center gap-1.5 rounded-lg border border-red-200 bg-white px-3 py-1.5 text-xs font-medium text-red-600 transition hover:bg-red-50 hover:border-red-300 active:bg-red-100"
               @click="$emit('remove', member)"
             >
+              <X class="h-3.5 w-3.5" />
               {{ member.status === "PENDING" ? "Cancel Invite" : "Remove" }}
             </button>
           </td>
@@ -98,6 +99,7 @@
 
 <script lang="ts" setup>
 import type { WorkspaceMember, Role } from "~/types/member";
+import { X } from "lucide-vue-next";
 
 defineProps<{
   members: WorkspaceMember[];
