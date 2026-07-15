@@ -1,7 +1,25 @@
 <template>
   <section class="space-y-6">
+    <!-- Loading workspace – enhanced spinner -->
     <div
-      v-if="!workspace"
+      v-if="loadingWorkspace"
+      class="flex min-h-[80vh] items-center justify-center"
+    >
+      <div class="flex flex-col items-center space-y-4">
+        <!-- Spinner with gradient ring -->
+        <div class="relative">
+          <div
+            class="h-16 w-16 animate-spin rounded-full border-4 border-slate-200 border-t-indigo-600"
+          ></div>
+        </div>
+        <p class="text-sm font-medium text-slate-500 animate-pulse">
+          Loading workspace...
+        </p>
+      </div>
+    </div>
+    <!-- No workspace selected -->
+    <div
+      v-else-if="!workspace"
       class="rounded-2xl border border-dashed border-slate-300 bg-white/50 p-10 text-center"
     >
       <p class="text-slate-600">Select a workspace first.</p>
@@ -13,6 +31,7 @@
       </NuxtLink>
     </div>
 
+    <!-- Dashboard content -->
     <template v-else>
       <div>
         <h1 class="text-3xl font-bold text-slate-900">{{ workspace.name }}</h1>
@@ -115,6 +134,7 @@ const projectStore = useProjectStore();
 const authStore = useAuthStore();
 
 const workspace = computed(() => workspaceStore.selectedWorkspace);
+const loadingWorkspace = ref(true);
 
 async function loadEverything() {
   if (!workspace.value) return;
@@ -125,8 +145,12 @@ async function loadEverything() {
 }
 
 onMounted(async () => {
-  workspaceStore.initializeWorkspace();
-  await loadEverything();
+  loadingWorkspace.value = true;
+  await workspaceStore.initializeWorkspace();
+  loadingWorkspace.value = false;
+  if (workspace.value) {
+    await loadEverything();
+  }
 });
 
 watch(workspace, async (ws) => {
