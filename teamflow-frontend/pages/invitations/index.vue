@@ -11,54 +11,112 @@
       </p>
     </div>
 
+    <!-- Invitation cards -->
     <div
       v-if="
         invitationStore.invitations.length === 0 && !invitationStore.loading
       "
-      class="rounded-2xl border border-dashed border-slate-300 bg-white/50 p-10 text-center text-slate-400"
+      class="relative rounded-2xl border border-dashed border-slate-200 bg-white/60 p-16 text-center backdrop-blur-sm"
     >
-      No pending invitations.
+      <Inbox class="mx-auto h-12 w-12 text-slate-300" />
+      <h3 class="mt-4 text-lg font-semibold text-slate-700">
+        No pending invitations
+      </h3>
+      <p class="mt-1 text-sm text-slate-500">
+        You're all set! Check back later for new invitations.
+      </p>
     </div>
 
-    <div class="grid gap-4 md:grid-cols-2">
+    <div v-else class="relative grid gap-4 md:grid-cols-2">
       <div
         v-for="invite in invitationStore.invitations"
         :key="invite.id"
-        class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
+        class="group rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
       >
-        <div class="flex items-start gap-3">
+        <div class="flex items-start gap-4">
+          <!-- Workspace avatar -->
           <div
-            class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-indigo-100 text-sm font-bold text-indigo-700"
+            class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-100 to-purple-100 text-base font-bold text-indigo-700"
           >
             {{ invite.workspace.name.charAt(0).toUpperCase() }}
           </div>
-          <div class="flex-1">
-            <h2 class="font-semibold text-slate-900">
+
+          <div class="flex-1 min-w-0">
+            <h2 class="text-lg font-semibold text-slate-900 truncate">
               {{ invite.workspace.name }}
             </h2>
-            <p class="text-sm text-slate-500">
-              Invited as
-              <span class="font-medium text-slate-700">{{
-                invite.role.toLowerCase()
-              }}</span>
-            </p>
+            <div
+              class="flex flex-wrap items-center gap-2 text-sm text-slate-500"
+            >
+              <span>Invited as</span>
+              <span
+                class="rounded-full bg-indigo-50 px-2.5 py-0.5 text-xs font-semibold text-indigo-700"
+              >
+                {{ invite.role.toLowerCase() }}
+              </span>
+            </div>
           </div>
         </div>
 
+        <!-- Action buttons -->
         <div class="mt-5 flex gap-3">
           <button
             :disabled="processingId === invite.id"
-            class="flex-1 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-60"
+            class="flex-1 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 px-4 py-2.5 text-sm font-semibold text-white shadow-md shadow-indigo-200 transition hover:shadow-lg hover:shadow-indigo-300 disabled:opacity-60"
             @click="handleAccept(invite)"
           >
-            Accept
+            <span
+              v-if="processingId === invite.id"
+              class="flex items-center justify-center gap-2"
+            >
+              <svg class="h-4 w-4 animate-spin" viewBox="0 0 24 24">
+                <circle
+                  class="opacity-25"
+                  cx="12"
+                  cy="12"
+                  fill="none"
+                  r="10"
+                  stroke="currentColor"
+                  stroke-width="4"
+                />
+                <path
+                  class="opacity-75"
+                  d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 00-8 8z"
+                  fill="currentColor"
+                />
+              </svg>
+              Accepting...
+            </span>
+            <span v-else>Accept</span>
           </button>
           <button
             :disabled="processingId === invite.id"
-            class="flex-1 rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 disabled:opacity-60"
+            class="flex-1 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50 hover:border-slate-300 disabled:opacity-60"
             @click="handleDecline(invite)"
           >
-            Decline
+            <span
+              v-if="processingId === invite.id"
+              class="flex items-center justify-center gap-2"
+            >
+              <svg class="h-4 w-4 animate-spin" viewBox="0 0 24 24">
+                <circle
+                  class="opacity-25"
+                  cx="12"
+                  cy="12"
+                  fill="none"
+                  r="10"
+                  stroke="currentColor"
+                  stroke-width="4"
+                />
+                <path
+                  class="opacity-75"
+                  d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 00-8 8z"
+                  fill="currentColor"
+                />
+              </svg>
+              Declining...
+            </span>
+            <span v-else>Decline</span>
           </button>
         </div>
       </div>
@@ -68,6 +126,7 @@
 
 <script lang="ts" setup>
 import type { Invitation } from "~/types/invitation";
+import { Mail, Inbox } from "lucide-vue-next";
 
 definePageMeta({
   layout: "dashboard",
