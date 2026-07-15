@@ -1,13 +1,25 @@
 <template>
   <div class="space-y-8">
-    <LayoutBreadcrumb
-      :items="[
-        { label: workspace.name, to: '/dashboard' },
-        { label: 'Projects' },
-      ]"
-    />
+    <!-- Loading workspace spinner -->
     <div
-      v-if="!workspace"
+      v-if="loadingWorkspace"
+      class="flex min-h-[60vh] items-center justify-center"
+    >
+      <div class="flex flex-col items-center space-y-4">
+        <div class="relative">
+          <div
+            class="h-16 w-16 animate-spin rounded-full border-4 border-slate-200 border-t-indigo-600"
+          ></div>
+        </div>
+        <p class="text-sm font-medium text-slate-500 animate-pulse">
+          Loading Projects...
+        </p>
+      </div>
+    </div>
+
+    <!-- No workspace selected -->
+    <div
+      v-else-if="!workspace"
       class="rounded-2xl border border-dashed border-slate-300 bg-white/50 p-10 text-center"
     >
       <p class="text-slate-600">
@@ -21,7 +33,16 @@
       </NuxtLink>
     </div>
 
+    <!-- Workspace content -->
     <template v-else>
+      <!-- Breadcrumb -->
+      <LayoutBreadcrumb
+        :items="[
+          { label: workspace.name, to: '/dashboard' },
+          { label: 'Projects' },
+        ]"
+      />
+
       <div
         class="fade-in-up flex flex-col gap-4 rounded-3xl border border-white/20 bg-white/70 p-6 shadow-lg shadow-slate-200/20 backdrop-blur-xl sm:flex-row sm:items-center sm:justify-between"
       >
@@ -59,12 +80,18 @@
         </button>
       </div>
 
-      <p
+      <div
         v-if="!projectStore.loading && projectStore.projects.length === 0"
-        class="text-sm text-slate-500"
+        class="rounded-2xl border border-dashed border-slate-200 bg-slate-50/50 p-12 text-center"
       >
-        No projects yet. Create your first one to get started.
-      </p>
+        <FolderOpen class="mx-auto h-12 w-12 text-slate-300" />
+        <h3 class="mt-4 text-lg font-semibold text-slate-700">
+          No projects yet
+        </h3>
+        <p class="mt-2 text-sm text-slate-500">
+          Get started by creating your first project.
+        </p>
+      </div>
 
       <ProjectList
         :can-manage="workspaceStore.isManagerOrAbove"
@@ -84,7 +111,7 @@
         @submit="saveProject"
       />
 
-      <!-- Delete confirmation -->
+      <!-- Delete confirmation modal -->
       <Teleport to="body">
         <Transition name="modal">
           <div
@@ -99,7 +126,7 @@
               <p class="mt-2 text-sm text-slate-500">
                 This will permanently delete
                 <span class="font-medium text-slate-700">{{
-                  deletingProject?.name
+                  deletingProject.name
                 }}</span>
                 and all of its tasks. This can't be undone.
               </p>
@@ -132,6 +159,8 @@ import ProjectList from "~/components/project/ProjectList.vue";
 import ProjectModal from "~/components/project/ProjectModal.vue";
 import type { Project, CreateProjectDto } from "~/types/project";
 
+import { FolderOpen } from "lucide-vue-next";
+
 definePageMeta({
   layout: "dashboard",
   middleware: "auth",
@@ -142,6 +171,7 @@ const projectStore = useProjectStore();
 const toast = useToast();
 
 const workspace = computed(() => workspaceStore.selectedWorkspace);
+const loadingWorkspace = ref(true); // Start true to show spinner
 
 const showModal = ref(false);
 const editingProject = ref<Project | null>(null);
@@ -151,16 +181,82 @@ const deleteLoading = ref(false);
 const route = useRoute();
 
 onMounted(async () => {
-  workspaceStore.initializeWorkspace();
-  await workspaceStore.fetchWorkspaces(); // or your existing init logic — keep whatever's already there
+  loadingWorkspace.value = true;
+  await workspaceStore.initializeWorkspace();
+  // If you need to fetch workspaces separately, do it here, but initializeWorkspace likely does it.
+  // If not, uncomment:
+  // await workspaceStore.fetchWorkspaces();
+  loadingWorkspace.value = false;
 
+  // Check for query param after workspace is loaded
   if (route.query.action === "new" && workspaceStore.isManagerOrAbove) {
     editingProject.value = null;
     showModal.value = true;
   }
 });
 
-// Refetch if the selected workspace changes (e.g. user switches workspace elsewhere)
+// Refetch projects when workspace changes (after loading)
+watch(workspace, async (ws) => {
+  // Only fetch if we're not in loading state and workspace exists
+  if (!loadingWorkspace.value && ws) {
+    await projectStore.fetchProjects(ws.id);
+  } else if (!ws) {
+    projectStore.reset();
+  }
+});
+
+// Also trigger initial fetch when workspace becomes available after loading
+// We'll use a separate watch to handle the first load after loadingWorkspace becomes false
+// But we can also call fetchProjects in onMounted after loadingWorkspace is false.
+// For simplicity, we'll add a watcher that triggers when loadingWorkspace becomes false and workspace is set.
+// However, the above watch will run when workspace changes, but initially workspace might be set before loadingWorkspace becomes false?
+// Better to handle explicitly:
+// We can use an immediate watcher or call fetch in onMounted after loading.
+// Let's add an onMounted that fetches after loadingWorkspace is false.
+// Actually we already have loadingWorkspace set false in onMounted; we can fetch there.
+
+// Update: we'll move the fetch to after loadingWorkspace is false in onMounted.
+// But we also need to handle when workspace changes later.
+
+// Let's refactor: we'll have a function loadProjects() that we call when workspace is ready.
+async function loadProjects() {
+  if (workspace.value) {
+    await projectStore.fetchProjects(workspace.value.id);
+  } else {
+    projectStore.reset();
+  }
+}
+
+// In onMounted, after loadingWorkspace false, call loadProjects.
+// Also watch for workspace changes to reload.
+
+// We'll adjust accordingly.
+
+// We'll keep the original onMounted and add the call.
+// But we must be careful not to double-fetch.
+
+// Let's rewrite:
+
+onMounted(async () => {
+  loadingWorkspace.value = true;
+  await workspaceStore.initializeWorkspace();
+  // If you need to fetch workspaces list, uncomment:
+  // await workspaceStore.fetchWorkspaces();
+  loadingWorkspace.value = false;
+
+  // Load projects if workspace exists
+  if (workspace.value) {
+    await projectStore.fetchProjects(workspace.value.id);
+  }
+
+  // Handle query param
+  if (route.query.action === "new" && workspaceStore.isManagerOrAbove) {
+    editingProject.value = null;
+    showModal.value = true;
+  }
+});
+
+// Watch for workspace changes (e.g., user switches workspace from another page)
 watch(workspace, async (ws) => {
   if (ws) {
     await projectStore.fetchProjects(ws.id);
