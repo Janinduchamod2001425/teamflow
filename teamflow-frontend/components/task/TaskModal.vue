@@ -50,28 +50,57 @@
             </div>
 
             <!-- Right: attachments + comments (only once the task actually exists) -->
-            <div
-              v-if="task && workspaceId"
-              class="overflow-y-auto p-6 lg:w-1/2 lg:p-8"
-            >
-              <AttachmentSection
-                :task-id="task.id"
-                :workspace-id="workspaceId"
-              />
+            <div class="overflow-y-auto p-6 lg:w-1/2 lg:p-8">
+              <template v-if="task && workspaceId">
+                <AttachmentSection
+                  :task-id="task.id"
+                  :workspace-id="workspaceId"
+                />
 
-              <CommentSection
-                v-if="projectId"
-                :can-manage="canManage"
-                :current-user-id="currentUserId"
-                :project-id="projectId"
-                :task-id="task.id"
-                :workspace-id="workspaceId"
-                class="mt-8 border-t border-slate-100 pt-6"
-                @comment-count-change="
-                  (taskId: string, delta: number) =>
-                    $emit('comment-count-change', taskId, delta)
-                "
-              />
+                <CommentSection
+                  v-if="projectId"
+                  :can-manage="canManage"
+                  :current-user-id="currentUserId"
+                  :project-id="projectId"
+                  :task-id="task.id"
+                  :workspace-id="workspaceId"
+                  class="mt-8 border-t border-slate-100 pt-6"
+                  @comment-count-change="
+                    (taskId: string, delta: number) =>
+                      $emit('comment-count-change', taskId, delta)
+                  "
+                />
+              </template>
+
+              <div
+                v-else
+                class="flex h-full flex-col items-center justify-center py-12 text-center"
+              >
+                <div
+                  class="flex h-12 w-12 items-center justify-center rounded-full bg-slate-50 text-slate-300"
+                >
+                  <svg
+                    class="h-6 w-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="1.5"
+                    />
+                  </svg>
+                </div>
+                <p class="mt-3 text-sm font-medium text-slate-500">
+                  Comments &amp; attachments
+                </p>
+                <p class="mt-1 max-w-[220px] text-xs text-slate-400">
+                  Save this task first, then you'll be able to add files and
+                  start a discussion.
+                </p>
+              </div>
             </div>
           </div>
         </div>
