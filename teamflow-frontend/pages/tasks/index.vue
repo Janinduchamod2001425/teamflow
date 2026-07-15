@@ -1,7 +1,25 @@
 <template>
   <section class="space-y-6">
+    <!-- Loading workspace spinner -->
     <div
-      v-if="!workspace"
+      v-if="loadingWorkspace"
+      class="flex min-h-[60vh] items-center justify-center"
+    >
+      <div class="flex flex-col items-center space-y-4">
+        <div class="relative">
+          <div
+            class="h-16 w-16 animate-spin rounded-full border-4 border-slate-200 border-t-indigo-600"
+          ></div>
+        </div>
+        <p class="text-sm font-medium text-slate-500 animate-pulse">
+          Loading Tasks...
+        </p>
+      </div>
+    </div>
+
+    <!-- No workspace selected -->
+    <div
+      v-else-if="!workspace"
       class="rounded-2xl border border-dashed border-slate-300 bg-white/50 p-10 text-center"
     >
       <p class="text-slate-600">Select a workspace first.</p>
@@ -13,6 +31,7 @@
       </NuxtLink>
     </div>
 
+    <!-- Workspace content -->
     <template v-else>
       <div
         class="flex flex-col gap-4 rounded-3xl border border-white/20 bg-white/70 p-6 shadow-lg shadow-slate-200/20 backdrop-blur-xl sm:flex-row sm:items-center sm:justify-between"
@@ -130,6 +149,7 @@
           </button>
         </div>
 
+        <!-- Task table -->
         <div
           class="overflow-hidden rounded-2xl border border-slate-200 bg-white"
         >
@@ -196,20 +216,30 @@
                 </td>
               </tr>
 
+              <!-- ENHANCED EMPTY STATE for no tasks -->
               <tr
                 v-if="
                   !taskStore.searchLoading &&
                   taskStore.searchResults.length === 0
                 "
               >
-                <td class="px-4 py-10 text-center text-slate-400" colspan="8">
-                  No tasks found.
+                <td class="px-4 py-12 text-center" colspan="8">
+                  <div class="flex flex-col items-center">
+                    <ClipboardList class="h-12 w-12 text-slate-300" />
+                    <h3 class="mt-4 text-lg font-semibold text-slate-700">
+                      No tasks found
+                    </h3>
+                    <p class="mt-2 text-sm text-slate-500">
+                      Try adjusting your search or filters.
+                    </p>
+                  </div>
                 </td>
               </tr>
             </tbody>
           </table>
         </div>
 
+        <!-- Pagination (unchanged) -->
         <div
           v-if="taskStore.searchMeta.totalPages > 1"
           class="flex items-center justify-center gap-2"
@@ -235,6 +265,7 @@
         </div>
       </template>
 
+      <!-- Modals (unchanged) -->
       <TaskModal
         :can-manage="workspaceStore.isManagerOrAbove"
         :current-user-id="authStore.user?.id"
@@ -296,6 +327,7 @@ import TaskModal from "~/components/task/TaskModal.vue";
 import { TaskService } from "~/services/task.service";
 import type { Task, TaskStatus } from "~/types/task";
 import type { Project } from "~/types/project";
+import { ClipboardList, Plus } from "lucide-vue-next";
 
 definePageMeta({
   layout: "dashboard",
@@ -308,8 +340,11 @@ const workspaceStore = useWorkspaceStore();
 const projectStore = useProjectStore();
 const taskStore = useTaskStore();
 const toast = useToast();
+const authStore = useAuthStore();
+const commentStore = useCommentStore();
 
 const workspace = computed(() => workspaceStore.selectedWorkspace);
+const loadingWorkspace = ref(true); // ✅ added
 
 const selectedProjectId = ref((route.query.projectId as string) || "");
 const activeProject = computed<Project | null>(
@@ -322,8 +357,6 @@ const editingTask = ref<Task | null>(null);
 const deletingTask = ref<Task | null>(null);
 const deleteLoading = ref(false);
 
-const authStore = useAuthStore();
-
 const filters = reactive({
   keyword: "",
   status: "",
@@ -333,7 +366,10 @@ const filters = reactive({
 });
 
 onMounted(async () => {
-  workspaceStore.initializeWorkspace();
+  loadingWorkspace.value = true;
+  await workspaceStore.initializeWorkspace();
+  loadingWorkspace.value = false;
+
   if (!workspace.value) return;
 
   await projectStore.fetchProjects(workspace.value.id);
@@ -503,8 +539,6 @@ const priorityStyles: Record<string, string> = {
   HIGH: "bg-amber-100 text-amber-700",
   URGENT: "bg-red-100 text-red-700",
 };
-
-const commentStore = useCommentStore();
 
 function closeTaskModal() {
   showModal.value = false;
