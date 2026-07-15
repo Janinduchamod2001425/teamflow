@@ -24,9 +24,13 @@
 
         <div
           v-else
-          class="flex h-11 w-11 items-center justify-center rounded-xl bg-indigo-600 text-sm font-bold text-white"
+          class="flex h-11 w-11 items-center justify-center rounded-xl"
         >
-          TF
+          <img
+            alt="TeamFlow"
+            class="h-9 w-9 object-contain"
+            src="/teamflow_logo.svg"
+          />
         </div>
 
         <button
