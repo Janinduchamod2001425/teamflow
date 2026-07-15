@@ -9,7 +9,7 @@ export default defineNuxtConfig({
     appManifest: false,
   },
 
-  modules: ["@pinia/nuxt", "@nuxtjs/tailwindcss"],
+  modules: ["@pinia/nuxt", "@nuxtjs/tailwindcss", "@vueuse/motion/nuxt"],
 
   runtimeConfig: {
     public: {
