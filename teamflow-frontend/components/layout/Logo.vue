@@ -1,9 +1,13 @@
 <template>
   <NuxtLink class="flex items-center gap-2" to="/">
     <div
-      class="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-600 text-white"
+      class="flex h-11 w-11 items-center justify-center rounded-xl shadow-lg shadow-indigo-200"
     >
-      TF
+      <img
+        alt="TeamFlow logo"
+        class="h-9 w-9 object-contain"
+        src="/teamflow_logo.svg"
+      />
     </div>
 
     <div>
