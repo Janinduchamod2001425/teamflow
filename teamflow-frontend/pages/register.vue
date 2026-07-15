@@ -25,26 +25,19 @@
 
     <!-- Registration Card -->
     <div
-      class="relative w-full max-w-md rounded-3xl border border-slate-200/60 bg-white/80 p-8 shadow-xl shadow-slate-200/20 backdrop-blur-xl"
+      class="relative w-full max-w-md rounded-3xl border border-slate-200/60 bg-white/80 p-8 shadow-2xl shadow-slate-400/20 backdrop-blur-xl"
     >
       <!-- Logo/Brand Area -->
       <div class="mb-8 flex items-center justify-center">
         <div
-          class="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 shadow-lg shadow-indigo-200"
+          class="flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-50 to-purple-100 shadow-lg shadow-indigo-200"
         >
-          <svg
-            class="h-6 w-6 text-white"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="1.5"
-            />
-          </svg>
+          <!-- New logo image -->
+          <img
+            alt="TeamFlow logo"
+            class="h-10 w-10 rounded-xl object-contain"
+            src="/teamflow_logo.svg"
+          />
         </div>
       </div>
 
