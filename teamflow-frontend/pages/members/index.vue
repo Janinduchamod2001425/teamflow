@@ -1,7 +1,25 @@
 <template>
   <section class="space-y-6">
+    <!-- Loading workspace spinner -->
     <div
-      v-if="!workspace"
+      v-if="loadingWorkspace"
+      class="flex min-h-[60vh] items-center justify-center"
+    >
+      <div class="flex flex-col items-center space-y-4">
+        <div class="relative">
+          <div
+            class="h-16 w-16 animate-spin rounded-full border-4 border-slate-200 border-t-indigo-600"
+          ></div>
+        </div>
+        <p class="text-sm font-medium text-slate-500 animate-pulse">
+          Loading Members...
+        </p>
+      </div>
+    </div>
+
+    <!-- No workspace selected -->
+    <div
+      v-else-if="!workspace"
       class="rounded-2xl border border-dashed border-slate-300 bg-white/50 p-10 text-center"
     >
       <p class="text-slate-600">Select a workspace first.</p>
@@ -13,6 +31,7 @@
       </NuxtLink>
     </div>
 
+    <!-- Workspace content -->
     <template v-else>
       <LayoutBreadcrumb
         :items="[
@@ -147,6 +166,7 @@ const authStore = useAuthStore();
 const toast = useToast();
 
 const workspace = computed(() => workspaceStore.selectedWorkspace);
+const loadingWorkspace = ref(true); // ✅ added
 
 const canManage = computed(() => {
   const uid = authStore.user?.id;
@@ -164,7 +184,10 @@ const route = useRoute();
 const isPending = computed(() => removingMember.value?.status === "PENDING");
 
 onMounted(async () => {
-  workspaceStore.initializeWorkspace();
+  loadingWorkspace.value = true;
+  await workspaceStore.initializeWorkspace();
+  loadingWorkspace.value = false;
+
   if (workspace.value) {
     await memberStore.fetchMembers(workspace.value.id);
   }
